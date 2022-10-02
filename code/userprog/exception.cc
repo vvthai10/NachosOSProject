@@ -48,14 +48,112 @@
 //	is in machine.h.
 //----------------------------------------------------------------------
 
+/*
+// Input: - User space address (int)
+// - Limit of buffer (int)
+// Output:- Buffer (char*)
+// Purpose: Copy buffer from User memory space to System memory space
+char *User2System(int virtAddr, int limit)
+{
+	int i; // index
+	int oneChar;
+	char *kernelBuf = NULL;
+	kernelBuf = new char[limit + 1]; // need for terminal string
+	if (kernelBuf == NULL)
+		return kernelBuf;
+	memset(kernelBuf, 0, limit + 1);
+	// printf("\n Filename u2s:");
+	for (i = 0; i < limit; i++)
+	{
+		kernel->machine->ReadMem(virtAddr + i, 1, &oneChar);
+		kernelBuf[i] = (char)oneChar;
+		// printf("%c",kernelBuf[i]);
+		if (oneChar == 0)
+			break;
+	}
+	return kernelBuf;
+}
+
+// Input: - User space address (int)
+// - Limit of buffer (int)
+// - Buffer (char[])
+// Output:- Number of bytes copied (int)
+// Purpose: Copy buffer from System memory space to User memory space
+int System2User(int virtAddr, int len, char *buffer)
+{
+	if (len < 0)
+		return -1;
+	if (len == 0)
+		return len;
+	int i = 0;
+	int oneChar = 0;
+	do
+	{
+		oneChar = (int)buffer[i];
+		kernel->machine->WriteMem(virtAddr + i, 1, oneChar);
+		i++;
+	} while (i < len && oneChar != 0);
+	return i;
+}
+*/
+
+// Increase program counter
+void IncreaseProgramCounter()
+{
+	/* set previous programm counter (debugging only)*/
+	kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+
+	/* set programm counter to next instruction (all Instructions are 4 byte wide)*/
+	kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+
+	/* set next programm counter for brach execution */
+	kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
+
+}
+
+// HANDLE SOME SYSTEMCALL
+
+void HandleSyscallHalt()
+{
+	DEBUG(dbgSys, "\n Shutdown, initiated by user program.");
+	printf("\n\n Shutdown, initiated by user program.");
+	SysHalt();
+	ASSERTNOTREACHED();
+}
+
+void HandleSyscallAdd()
+{
+	DEBUG(dbgSys, "Add " << kernel->machine->ReadRegister(4) << " + " << kernel->machine->ReadRegister(5) << "\n");
+
+	/* Process SysAdd Systemcall*/
+	int result;
+	result = SysAdd(/* int op1 */ (int)kernel->machine->ReadRegister(4),
+					/* int op2 */ (int)kernel->machine->ReadRegister(5));
+
+	DEBUG(dbgSys, "Add returning more with " << result << "\n");
+	/* Prepare Result */
+	kernel->machine->WriteRegister(2, (int)result);
+
+	/* Modify return point */
+	return IncreaseProgramCounter();
+}
+
+void HandleSyscallReadNum(){
+	int result = SysReadNum();
+	kernel->machine->WriteRegister(2, result);
+	return IncreaseProgramCounter();
+}
+// HANDLE SOME SYSTEMCALL
+
+
+// EXCEPTION HANDLER
 void ExceptionHandler(ExceptionType which)
 {
 	int type = kernel->machine->ReadRegister(2);
 
 	DEBUG(dbgSys, "Received Exception " << which << " type: " << type << "\n");
-	cerr << which << "\n";
 
-	string desErrors[7] = {"PageFaultException", "ReadOnlyException", "BusErrorException", "AddressErrorException", "OverflowException", "IllegalInstrException", "NumExceptionTypes"};
+	string desErrors[9] = {"NoException", "SyscallException", "PageFaultException", "ReadOnlyException", "BusErrorException", "AddressErrorException", "OverflowException", "IllegalInstrException", "NumExceptionTypes"};
 
 	switch (which)
 	{
@@ -73,51 +171,23 @@ void ExceptionHandler(ExceptionType which)
 	case NumExceptionTypes:
 		cerr << "Description: " << desErrors[which] << "\n";
 		SysHalt();
-
-		ASSERTNOTREACHED();
 		break;
 
 	case SyscallException:
 		switch (type)
 		{
 		case SC_Halt:
-			DEBUG(dbgSys, "Shutdown, initiated by user program.\n");
-
-			SysHalt();
-
-			ASSERTNOTREACHED();
+			HandleSyscallHalt();
 			break;
 
 		case SC_Add:
-			DEBUG(dbgSys, "Add " << kernel->machine->ReadRegister(4) << " + " << kernel->machine->ReadRegister(5) << "\n");
-
-			/* Process SysAdd Systemcall*/
-			int result;
-			result = SysAdd(/* int op1 */ (int)kernel->machine->ReadRegister(4),
-							/* int op2 */ (int)kernel->machine->ReadRegister(5));
-
-			DEBUG(dbgSys, "Add returning with " << result << "\n");
-			/* Prepare Result */
-			kernel->machine->WriteRegister(2, (int)result);
-
-			/* Modify return point */
-			{
-				/* set previous programm counter (debugging only)*/
-				kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
-
-				/* set programm counter to next instruction (all Instructions are 4 byte wide)*/
-				kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
-
-				/* set next programm counter for brach execution */
-				kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
-			}
-
-			return;
-
-			ASSERTNOTREACHED();
-
+			HandleSyscallAdd();
 			break;
 
+		case SC_ReadNum:
+			HandleSyscallReadNum();
+			break;
+		
 		default:
 			cerr << "Unexpected system call " << type << "\n";
 			break;

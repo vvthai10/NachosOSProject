@@ -12,8 +12,9 @@ main()
 {
   int result;
   
-  result = Add(42, 23);
+  // result = Add(42, 23);
+  result = ReadNum();
 
+  // Always use halt() because don't create sysExit
   Halt();
-  /* not reached */
 }

@@ -112,7 +112,7 @@ ifeq ($(hosttype),unknown)
 PROGRAMS = unknownhost
 else
 # change this if you create a new test program!
-PROGRAMS = add halt shell matmult sort segments
+PROGRAMS = add createfile halt shell matmult sort segments
 endif
 
 all: $(PROGRAMS)
@@ -132,6 +132,13 @@ add.o: add.c
 add: add.o start.o
 	$(LD) $(LDFLAGS) start.o add.o -o add.coff
 	$(COFF2NOFF) add.coff add
+
+createfile.o: createfile.c
+	$(CC) $(CFLAGS) -c createfile.c
+
+createfile: createfile.o start.o
+	$(LD) $(LDFLAGS) start.o createfile.o -o createfile.coff
+	$(COFF2NOFF) createfile.coff createfile
 
 shell.o: shell.c
 	$(CC) $(CFLAGS) -c shell.c
