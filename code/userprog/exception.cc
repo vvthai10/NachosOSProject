@@ -103,6 +103,18 @@ int System2User(int virtAddr, int len, char *buffer)
 	return i;
 }
 
+void HandleSyscallReadNum(){
+	int result = SysReadNum();
+	kernel->machine->WriteRegister(2, result);
+	return;
+}
+
+void HandleSyscallPrintNum(){
+	int numberPrint = kernel->machine->ReadRegister(4);
+    SysPrintNum(numberPrint);
+	return;
+}
+
 void ExceptionHandler(ExceptionType which)
 {
 	int type = kernel->machine->ReadRegister(2);
@@ -142,41 +154,12 @@ void ExceptionHandler(ExceptionType which)
 
 			break;
 		case SC_ReadNum:
-			res = 5;
-			kernel->machine->WriteRegister(2, (int)res);
+			HandleSyscallReadNum();
 			increasePC();
 			return;
 			break;
 		case SC_PrintNum:
-			int input;	//chứa giá trị nhập
-			bool flag;	//dương là true , âm là false
-			int tempInput; 	//giá trị tạm thời để tính chiều dài của số
-			flag = true;
-			input = kernel->machine->ReadRegister(4);
-			
-			if(input < 0) {
-				input = -input;
-				flag = false;
-			}
-			tempInput = input;
-			int count;	//chiều dài số
-			count = 1;
-			while (tempInput >= 10)
-			{
-				tempInput = tempInput / 10;
-				count *= 10;
-			}
-			
-			//viêt ra màn hình
-			if(!flag) kernel->synchConsoleOut->PutChar('-');
-			while (count > 0)
-			{
-				DEBUG(dbgSys, "count value is " << count << "input value is " << input);
-				
-				kernel->synchConsoleOut->PutChar(char(input / count) + '0');
-				input = input % count;
-				count = count / 10;
-			}
+			HandleSyscallPrintNum();
 			increasePC();
 			return;
 			break;

@@ -5,24 +5,6 @@
 
 int main(){
 
-
-    // int n, a[SIZE + 1], order, temp, i, j;
-    // do {
-    //     PrintString("Enter n (0 <= n <= 100): ");
-    //     n = ReadNum();
-    //     if (n < 0 || n > 100)
-    //         PrintString(
-    //             "n has to be an integer between 1 and 100 (inclusive), please "
-    //             "try again\n");
-    // } while (n < 0 || n > 100);
-
-    // for (i = 0; i < n; i++) {
-    //     PrintString("Enter a[");
-    //     PrintNum(i);
-    //     PrintString("]: ");
-    //     a[i] = ReadNum();
-    // }
-
     int n = 0;
     int i, j, choose, temp = 0;
     int arr[MAX_LENGTH + 1];
@@ -46,7 +28,7 @@ int main(){
     do{
         PrintString("You want sort array to increase(1) or decrease(0): "); 
         choose = ReadNum();
-    }while(choose != 0 || choose != 1);
+    }while(choose != 0 && choose != 1);
 
     if(choose == 1){
         // Sắp xếp tăng dần
@@ -55,8 +37,8 @@ int main(){
             {
                 if (arr[j] > arr[j + 1])
                 {
-                    temp = arr[i];
-                    arr[i] = arr[j + 1];
+                    temp = arr[j];
+                    arr[j] = arr[j + 1];
                     arr[j + 1] = temp;
                 }
             }
