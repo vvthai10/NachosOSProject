@@ -142,6 +142,10 @@ void ExceptionHandler(ExceptionType which)
 
 			break;
 		case SC_ReadNum:
+			res = 5;
+			kernel->machine->WriteRegister(2, (int)res);
+			increasePC();
+			return;
 			break;
 		case SC_PrintNum:
 			int input;	//chứa giá trị nhập

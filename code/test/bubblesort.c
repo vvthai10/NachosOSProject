@@ -32,6 +32,10 @@ int main(){
     }
     while(n > MAX_LENGTH || n < 0);
 
+    PrintString("N = ");
+    PrintNum(n);
+
+
     for(i = 0; i < n; i++){
         PrintString("Enter arr[");
         PrintNum(i);
