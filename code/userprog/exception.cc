@@ -142,68 +142,11 @@ void ExceptionHandler(ExceptionType which)
 
 			break;
 		case SC_ReadNum:
-			char *num;	//số nhập vào được lưu vào đây
-			int len;	// chiều dài số
-			int result;	//kết quả nhập ở dạng int
-			result = 0;
-			bool negative; //kiểm tra số âm dương
-			negative = false;
-			num = new char[12];	// số nguyên kiêu int có độ dài lớn nhất là 11 + thêm kí tự kết thúc
-			memset(num, 0, 12);
-			
-			for (int i = 0; i < 12; i++) {
-				//đọc 1 kí tự nhập vào
-				num[i] = kernel->synchConsoleIn->GetChar();
-				DEBUG(dbgSys,"num["<<i<<"] " << num[i]);
-				
-				if(i == 0 && num[i] == '-') {
-					negative = true;
-					continue;
-				}
-				//kiểm tra kết thúc
-				if (isBlank(num[i])) {
-					len = i;
-					break;
-				}
-				//kiểm tra đúng cú pháp
-				if (num[i] < '0' || num[i] > '9' ) {
-					printf("number format error\n");
-					kernel->machine->WriteRegister(2, 0);
-					increasePC();
-					return;
-				}
-
-			}
-			//chuyển từ chuỗi sang số 
-
-			if(negative) {
-				int exponential10 = 1;
-				for (int i = len - 1; i >= 1 ; i--) {
-					result+= (num[i] - '0') * exponential10;
-					exponential10*=10;
-				}
-				result= result * (-1);
-				
-			}else {
-				int exponential10 = 1;
-				for (int i = len - 1; i >= 0 ; i--) {
-					result+= (num[i] - '0') * exponential10;
-					DEBUG(dbgSys,i << " " << result);
-					exponential10*=10;
-				}
-			}
-
-			delete num;
-			// DEBUG(dbgSys, "\nnumber input is :" << ch);
-			DEBUG(dbgSys, "input value is : " << result);
-			kernel->machine->WriteRegister(2, result);
-			increasePC();
-			return;
 			break;
 		case SC_PrintNum:
 			int input;	//chứa giá trị nhập
 			bool flag;	//dương là true , âm là false
-			int temp; 	//giá trị tạm thời để tính chiều dài của số
+			int tempInput; 	//giá trị tạm thời để tính chiều dài của số
 			flag = true;
 			input = kernel->machine->ReadRegister(4);
 			
@@ -211,12 +154,12 @@ void ExceptionHandler(ExceptionType which)
 				input = -input;
 				flag = false;
 			}
-			temp = input;
+			tempInput = input;
 			int count;	//chiều dài số
 			count = 1;
-			while (temp >= 10)
+			while (tempInput >= 10)
 			{
-				temp = temp / 10;
+				tempInput = tempInput / 10;
 				count *= 10;
 			}
 			
@@ -258,7 +201,7 @@ void ExceptionHandler(ExceptionType which)
 			break;
 		case SC_ReadString:
 			int virAdd;
-			
+			int len;
 			virAdd = kernel->machine->ReadRegister(4);
 			len = kernel->machine->ReadRegister(5);
 			DEBUG(dbgSys,"do dai chuoi muon doc la: " << len << "\n");
