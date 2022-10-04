@@ -3,7 +3,8 @@
         "iostream": "cpp",
         "*.tcc": "c",
         "functional": "c",
-        "system_error": "c"
+        "system_error": "c",
+        "sstream": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }

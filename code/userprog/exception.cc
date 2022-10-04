@@ -25,6 +25,12 @@
 #include "main.h"
 #include "syscall.h"
 #include "ksyscall.h"
+#define INT_MIN -2147483657
+#define INT_MAX 2147483657
+#define LF ((char)10)
+#define CR ((char)13)
+#define TAB ((char)9)
+#define SPACE ((char)' ')
 //----------------------------------------------------------------------
 // ExceptionHandler
 // 	Entry point into the Nachos kernel.  Called when a user program
@@ -47,12 +53,18 @@
 //	"which" is the kind of exception.  The list of possible exceptions
 //	is in machine.h.
 //----------------------------------------------------------------------
+void increasePC()
+{
+	/* set previous programm counter (debugging only)*/
+	kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
 
-/*
-// Input: - User space address (int)
-// - Limit of buffer (int)
-// Output:- Buffer (char*)
-// Purpose: Copy buffer from User memory space to System memory space
+	/* set programm counter to next instruction (all Instructions are 4 byte wide)*/
+	kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+
+	/* set next programm counter for brach execution */
+	kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
+}
+
 char *User2System(int virtAddr, int limit)
 {
 	int i; // index
@@ -74,11 +86,6 @@ char *User2System(int virtAddr, int limit)
 	return kernelBuf;
 }
 
-// Input: - User space address (int)
-// - Limit of buffer (int)
-// - Buffer (char[])
-// Output:- Number of bytes copied (int)
-// Purpose: Copy buffer from System memory space to User memory space
 int System2User(int virtAddr, int len, char *buffer)
 {
 	if (len < 0)
@@ -95,103 +102,226 @@ int System2User(int virtAddr, int len, char *buffer)
 	} while (i < len && oneChar != 0);
 	return i;
 }
-*/
 
-// Increase program counter
-void IncreaseProgramCounter()
-{
-	/* set previous programm counter (debugging only)*/
-	kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
-
-	/* set programm counter to next instruction (all Instructions are 4 byte wide)*/
-	kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
-
-	/* set next programm counter for brach execution */
-	kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
-
-}
-
-// HANDLE SOME SYSTEMCALL
-
-void HandleSyscallHalt()
-{
-	DEBUG(dbgSys, "\n Shutdown, initiated by user program.");
-	printf("\n\n Shutdown, initiated by user program.");
-	SysHalt();
-	ASSERTNOTREACHED();
-}
-
-void HandleSyscallAdd()
-{
-	DEBUG(dbgSys, "Add " << kernel->machine->ReadRegister(4) << " + " << kernel->machine->ReadRegister(5) << "\n");
-
-	/* Process SysAdd Systemcall*/
-	int result;
-	result = SysAdd(/* int op1 */ (int)kernel->machine->ReadRegister(4),
-					/* int op2 */ (int)kernel->machine->ReadRegister(5));
-
-	DEBUG(dbgSys, "Add returning more with " << result << "\n");
-	/* Prepare Result */
-	kernel->machine->WriteRegister(2, (int)result);
-
-	/* Modify return point */
-	return IncreaseProgramCounter();
-}
-
-void HandleSyscallReadNum(){
-	int result = SysReadNum();
-	kernel->machine->WriteRegister(2, result);
-	return IncreaseProgramCounter();
-}
-// HANDLE SOME SYSTEMCALL
-
-
-// EXCEPTION HANDLER
 void ExceptionHandler(ExceptionType which)
 {
 	int type = kernel->machine->ReadRegister(2);
 
 	DEBUG(dbgSys, "Received Exception " << which << " type: " << type << "\n");
 
-	string desErrors[9] = {"NoException", "SyscallException", "PageFaultException", "ReadOnlyException", "BusErrorException", "AddressErrorException", "OverflowException", "IllegalInstrException", "NumExceptionTypes"};
-
 	switch (which)
 	{
-	case NoException:
-		DEBUG(dbgSys, "Return kernel mode.\n");
-		kernel->interrupt->setStatus(SystemMode);
-		ASSERTNOTREACHED();
-		break;
-	case PageFaultException:
-	case ReadOnlyException:
-	case BusErrorException:
-	case AddressErrorException:
-	case OverflowException:
-	case IllegalInstrException:
-	case NumExceptionTypes:
-		cerr << "Description: " << desErrors[which] << "\n";
-		SysHalt();
-		break;
-
 	case SyscallException:
 		switch (type)
 		{
 		case SC_Halt:
-			HandleSyscallHalt();
+			DEBUG(dbgSys, "Shutdown, initiated by user program.\n");
+
+			SysHalt();
+
+			ASSERTNOTREACHED();
 			break;
 
 		case SC_Add:
-			HandleSyscallAdd();
-			break;
+			DEBUG(dbgSys, "Add " << kernel->machine->ReadRegister(4) << " + " << kernel->machine->ReadRegister(5) << "\n");
 
-		case SC_ReadNum:
-			HandleSyscallReadNum();
+			/* Process SysAdd Systemcall*/
+			int res;
+			res = SysAdd(/* int op1 */ (int)kernel->machine->ReadRegister(4),
+							/* int op2 */ (int)kernel->machine->ReadRegister(5));
+
+			DEBUG(dbgSys, "Add returning with " << res << "\n");
+			/* Prepare Result */
+			kernel->machine->WriteRegister(2, (int)res);
+			/* Modify return point */
+
+			increasePC();
+			return;
+
+			ASSERTNOTREACHED();
+
 			break;
-		
+		case SC_ReadNum:
+			char *num;	//số nhập vào được lưu vào đây
+			int len;	// chiều dài số
+			int result;	//kết quả nhập ở dạng int
+			result = 0;
+			bool negative; //kiểm tra số âm dương
+			negative = false;
+			num = new char[12];	// số nguyên kiêu int có độ dài lớn nhất là 11 + thêm kí tự kết thúc
+			memset(num, 0, 12);
+			
+			for (int i = 0; i < 12; i++) {
+				//đọc 1 kí tự nhập vào
+				num[i] = kernel->synchConsoleIn->GetChar();
+				DEBUG(dbgSys,"num["<<i<<"] " << num[i]);
+				
+				if(i == 0 && num[i] == '-') {
+					negative = true;
+					continue;
+				}
+				//kiểm tra kết thúc
+				if (isBlank(num[i])) {
+					len = i;
+					break;
+				}
+				//kiểm tra đúng cú pháp
+				if (num[i] < '0' || num[i] > '9' ) {
+					printf("number format error\n");
+					kernel->machine->WriteRegister(2, 0);
+					increasePC();
+					return;
+				}
+
+			}
+			//chuyển từ chuỗi sang số 
+
+			if(negative) {
+				int exponential10 = 1;
+				for (int i = len - 1; i >= 1 ; i--) {
+					result+= (num[i] - '0') * exponential10;
+					exponential10*=10;
+				}
+				result= result * (-1);
+				
+			}else {
+				int exponential10 = 1;
+				for (int i = len - 1; i >= 0 ; i--) {
+					result+= (num[i] - '0') * exponential10;
+					DEBUG(dbgSys,i << " " << result);
+					exponential10*=10;
+				}
+			}
+
+			delete num;
+			// DEBUG(dbgSys, "\nnumber input is :" << ch);
+			DEBUG(dbgSys, "input value is : " << result);
+			kernel->machine->WriteRegister(2, result);
+			increasePC();
+			return;
+			break;
+		case SC_PrintNum:
+			int input;	//chứa giá trị nhập
+			bool flag;	//dương là true , âm là false
+			int temp; 	//giá trị tạm thời để tính chiều dài của số
+			flag = true;
+			input = kernel->machine->ReadRegister(4);
+			
+			if(input < 0) {
+				input = -input;
+				flag = false;
+			}
+			temp = input;
+			int count;	//chiều dài số
+			count = 1;
+			while (temp >= 10)
+			{
+				temp = temp / 10;
+				count *= 10;
+			}
+			
+			//viêt ra màn hình
+			if(!flag) kernel->synchConsoleOut->PutChar('-');
+			while (count > 0)
+			{
+				DEBUG(dbgSys, "count value is " << count << "input value is " << input);
+				
+				kernel->synchConsoleOut->PutChar(char(input / count) + '0');
+				input = input % count;
+				count = count / 10;
+			}
+			increasePC();
+			return;
+			break;
+		case SC_ReadChar:
+			char character;
+			character = SysReadChar();
+			kernel->machine->WriteRegister(2, character);
+
+			increasePC();
+			return;
+			break;
+		case SC_PrintChar:
+			char inputCh;
+			inputCh = kernel->machine->ReadRegister(4);
+			SysPrintChar(inputCh);
+			increasePC();
+			return;
+			break;
+		case SC_RandomNum:
+			int ranNum;
+			srand((int)time(NULL));
+			ranNum =  rand() % 10000;
+			kernel->machine->WriteRegister(2, ranNum);
+			increasePC();
+			return;
+			break;
+		case SC_ReadString:
+			int virAdd;
+			
+			virAdd = kernel->machine->ReadRegister(4);
+			len = kernel->machine->ReadRegister(5);
+			DEBUG(dbgSys,"do dai chuoi muon doc la: " << len << "\n");
+			DEBUG(dbgSys,"dia chi vung chua chuoi la: " << virAdd << "\n");
+			
+			char* buffer;
+			buffer = new char[len+1];
+			SysReadString(buffer,len);
+			DEBUG(dbgSys,"chuoi nhap vao la: " << buffer)
+			System2User(virAdd,len,buffer);
+			
+			increasePC();
+			return;
+
+			break;
+		case SC_PrintString:
+			
+			virAdd = kernel->machine->ReadRegister(4);
+			char* inputString ;
+			inputString = User2System(virAdd,255);
+			DEBUG(dbgSys,"chuoi xuat ra man hinh la: " << inputString << "\n");
+			SysPrintString(inputString);
+			increasePC();
+			return;
+			break;
 		default:
 			cerr << "Unexpected system call " << type << "\n";
 			break;
 		}
+
+		break;
+	case PageFaultException:
+		printf("sadasfafas");
+		SysHalt();
+		break;
+	case ReadOnlyException:
+		printf("ReadOnlyException\n");
+		SysHalt();
+		break;
+	case BusErrorException:
+		printf("BusErrorException");
+		SysHalt();
+		break;
+	case AddressErrorException:
+		printf("AddressErrorException");
+		SysHalt();
+		break;
+	case OverflowException:
+		printf("OverflowException");
+		SysHalt();
+		break;
+	case IllegalInstrException:
+		printf("IllegalInstrException");
+		SysHalt();
+		return;
+		break;
+	case NumExceptionTypes:
+		printf("NumExceptionTypes");
+		SysHalt();
+		return;
+		break;
+	case NoException:
+		return;
 		break;
 	default:
 		cerr << "Unexpected user mode exception" << (int)which << "\n";

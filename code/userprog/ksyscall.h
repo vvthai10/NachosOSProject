@@ -2,18 +2,19 @@
  *
  * userprog/ksyscall.h
  *
- * Kernel interface for systemcalls
+ * Kernel interface for systemcalls 
  *
  * by Marcus Voelp  (c) Universitaet Karlsruhe
  *
  **************************************************************/
 
-#ifndef __USERPROG_KSYSCALL_H__
-#define __USERPROG_KSYSCALL_H__
+#ifndef __USERPROG_KSYSCALL_H__ 
+#define __USERPROG_KSYSCALL_H__ 
+
 
 #include "kernel.h"
 #include "synchconsole.h"
-#include <stdlib.h>
+#include "stdlib.h"
 
 #define LF ((char)10)
 #define CR ((char)13)
@@ -23,90 +24,58 @@
 #define MAX_LENGTH 10
 bool isBlank(char c) { return c == LF || c == CR || c == TAB || c == SPACE; }
 // Kiểm tra nếu
-bool CheckInput(char c)
-{
-  if ((c >= (char)'0') && (c <= (char)'9'))
-  {
-    return true;
-  }
-  return false;
-}
+
 
 void SysHalt()
 {
   kernel->interrupt->Halt();
 }
 
+
 int SysAdd(int op1, int op2)
 {
   return op1 + op2;
 }
 
-int SysReadNum()
-{
-  // Bước 1: Đọc các kí tự vào trong bàn phím
-  char numberInput[MAX_LENGTH + 2];
+char SysReadChar() {
+  char c;
+  c = kernel->synchConsoleIn->GetChar();
+  return c;
+}
 
-  int n = 0;
-  char c = kernel->synchConsoleIn->GetChar();
+void SysPrintChar(char c) {
+  kernel->synchConsoleOut->PutChar(c);
+}
 
-  // Khi nhận kí tự enter thì kết thúc việc nhập
-  while (c != (char)10)
-  {
-    numberInput[n++] = c;
-    if (n > MAX_LENGTH)
-    {
-      DEBUG(dbgSys, "Number is too long");
-      break;
-    }
-    c = kernel->synchConsoleIn->GetChar();
+void SysReadString(char* string, int len) {
+
+  char c;
+  int i;
+  i=0;
+
+
+  for(;i < len; i++){
+    c = SysReadChar();
+    if(c==LF) break;
+    string[i] = c;
   }
+  
+    
+  string[i] = '\0';
 
-  // Bước 2:Xử lý các trường hợp sẽ gặp phải
-  // Trường hợp độ dài chuỗi là rỗng.
-  int length = n;
-  if (length == 0)
-  {
-    DEBUG(dbgSys, "Value of integer is zero\n");
-    return 0;
-  }
+  return;
+}
 
-  // Trường hợp chuỗi nhập vào không phải là số nguyên
-  bool isInteger = true;
-
-  for (int i = 0; i < length; i++)
+void SysPrintString(char* string){
+  int len;
+  len = 0;
+  if(!string) return;
+  while (string[len] != '\0')
   {
-    c = numberInput[i];
-    if (i == 0 && c == (char)'-')
-    {
-      isInteger = true;
-    }
-    else if (!CheckInput(c))
-    {
-      isInteger = false;
-      break;
-    }
+    SysPrintChar(string[len]);
+    len++;
   }
-  if (!isInteger)
-  {
-    DEBUG(dbgSys, "Value of input not a integer \n");
-    return 0;
-  }
-
-  // Trường hợp nó vượt quá ngưỡng của phạm vi integer
-  //-2147483648 to 2147483647
-  // Đang gặp lỗi nhập trùng vào 2 khoảng thì đúng hàm strcmp = 0 nhưng lại trả là 1
-  if (numberInput[0] == (char)'-')
-  {
-    DEBUG(dbgSys, "Compare with -2147483648: " << strcmp(numberInput, "-2147483648") << "\n");
-  }
-  else
-  {
-    DEBUG(dbgSys, "Compare with 2147483647: "<< strcmp("2147483647", "2147483647") << "\n");
-    DEBUG(dbgSys, "Compare with 2147483647: "<< strcmp(numberInput, "2147483647") << "\n");
-  }
-
-  return 0;
+  SysPrintChar(string[len]);
 }
 
 #endif /* ! __USERPROG_KSYSCALL_H__ */
