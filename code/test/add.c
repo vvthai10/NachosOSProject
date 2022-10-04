@@ -10,10 +10,11 @@
 int
 main()
 {
-  int result;
+  int result = 456;
   
   // result = Add(42, 23);
-  result = ReadNum();
+  // result = ReadNum();
+  PrintNum(result);
 
   // Always use halt() because don't create sysExit
   Halt();

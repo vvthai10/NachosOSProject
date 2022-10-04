@@ -143,6 +143,12 @@ void HandleSyscallReadNum(){
 	kernel->machine->WriteRegister(2, result);
 	return IncreaseProgramCounter();
 }
+
+void HandleSyscallPrintNum(){
+	int numberPrint = kernel->machine->ReadRegister(4);
+    SysPrintNum(numberPrint);
+	return IncreaseProgramCounter();
+}
 // HANDLE SOME SYSTEMCALL
 
 
@@ -186,6 +192,10 @@ void ExceptionHandler(ExceptionType which)
 
 		case SC_ReadNum:
 			HandleSyscallReadNum();
+			break;
+
+		case SC_PrintNum:
+			HandleSyscallPrintNum();
 			break;
 		
 		default:

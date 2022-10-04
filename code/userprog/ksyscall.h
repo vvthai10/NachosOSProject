@@ -132,4 +132,34 @@ int SysReadNum()
   return num;
 }
 
+void SysPrintNum(int number) {
+    // Check có bằng 0
+    if(number == 0){
+      DEBUG(dbgSys, "Number is zero.\n");
+      kernel->synchConsoleOut->PutChar('0');
+      return;
+    }
+
+    // if (num == INT32_MIN) {
+    //     kernel->synchConsoleOut->PutChar('-');
+    //     for (int i = 0; i < 10; ++i)
+    //         kernel->synchConsoleOut->PutChar("2147483648"[i]);
+    //     return;
+    // }
+
+    if (number < 0) {
+        kernel->synchConsoleOut->PutChar('-');
+        number = -number;
+    }
+    int n = 0;
+    char numberPrint[MAX_LENGTH];
+    while (number) {
+        numberPrint[n++] = number % 10;
+        number /= 10;
+    }
+    for (int i = n - 1; i >= 0; --i){
+        kernel->synchConsoleOut->PutChar(numberPrint[i] + '0');
+    }
+}
+
 #endif /* ! __USERPROG_KSYSCALL_H__ */
