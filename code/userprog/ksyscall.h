@@ -20,7 +20,7 @@
 #define TAB ((char)9)
 #define SPACE ((char)' ')
 
-#define MAX_LENGTH 10
+#define MAX_LENGTH 11
 bool isBlank(char c) { return c == LF || c == CR || c == TAB || c == SPACE; }
 // Kiểm tra nếu
 bool CheckInput(char c)
@@ -45,15 +45,22 @@ int SysAdd(int op1, int op2)
 int SysReadNum()
 {
   // Bước 1: Đọc các kí tự vào trong bàn phím
-  char numberInput[MAX_LENGTH + 2];
+  char numberInput[MAX_LENGTH];
 
   int n = 0;
+  // int num = 0;
+  bool isNegative = false;
   char c = kernel->synchConsoleIn->GetChar();
 
   // Khi nhận kí tự enter thì kết thúc việc nhập
   while (c != (char)10)
   {
-    numberInput[n++] = c;
+    if(c == (char)'-' && n == 0){
+      isNegative = true;
+    }
+    else{
+      numberInput[n++] = c;
+    }
     if (n > MAX_LENGTH)
     {
       DEBUG(dbgSys, "Number is too long");
@@ -77,11 +84,8 @@ int SysReadNum()
   for (int i = 0; i < length; i++)
   {
     c = numberInput[i];
-    if (i == 0 && c == (char)'-')
-    {
-      isInteger = true;
-    }
-    else if (!CheckInput(c))
+    
+    if (!(c >= (char)'0') && (c <= (char)'9'))
     {
       isInteger = false;
       break;
@@ -93,20 +97,39 @@ int SysReadNum()
     return 0;
   }
 
-  // Trường hợp nó vượt quá ngưỡng của phạm vi integer
-  //-2147483648 to 2147483647
-  // Đang gặp lỗi nhập trùng vào 2 khoảng thì đúng hàm strcmp = 0 nhưng lại trả là 1
-  if (numberInput[0] == (char)'-')
-  {
-    DEBUG(dbgSys, "Compare with -2147483648: " << strcmp(numberInput, "-2147483648") << "\n");
-  }
-  else
-  {
-    DEBUG(dbgSys, "Compare with 2147483647: "<< strcmp("2147483647", "2147483647") << "\n");
-    DEBUG(dbgSys, "Compare with 2147483647: "<< strcmp(numberInput, "2147483647") << "\n");
+  // Trường hợp check ngoài giới hạn int sẽ gán sau
+  // Trường hợp nhập vào là 0000006
+  DEBUG(dbgSys, "Length: " << length << "\n");
+  if (length == 10){
+    char valueCheck[11];
+    strncpy(valueCheck, numberInput, 10);
+    valueCheck[10] = '\0';
+    DEBUG(dbgSys, "Value need check: " << valueCheck << "\n");
+    if(isNegative)
+    {
+      // bool isSmallerMin = false;
+      
+      DEBUG(dbgSys, "Compare with -2147483648: " << strcmp(numberInput, "-2147483648") << "\n");
+    }
+    else
+    {  
+      // bool isLargerMax = false;
+      DEBUG(dbgSys, "Compare with 2147483647: "<< strcmp("2147483647", "2147483647") << "\n");
+      DEBUG(dbgSys, "Compare with 2147483647: "<< strcmp(numberInput, "2147483647") << "\n");
+    }
   }
 
-  return 0;
+  int num = 0;
+  for(int i = 0; i < length; i++){
+
+    num = num * 10 + (numberInput[i] - '0');
+    DEBUG(dbgSys, "Result: " << num << "\n");
+
+  }
+
+  DEBUG(dbgSys, "Result: " << num << "\n");
+
+  return num;
 }
 
 #endif /* ! __USERPROG_KSYSCALL_H__ */
