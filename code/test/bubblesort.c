@@ -5,34 +5,49 @@
 
 int main(){
 
+
+    // int n, a[SIZE + 1], order, temp, i, j;
+    // do {
+    //     PrintString("Enter n (0 <= n <= 100): ");
+    //     n = ReadNum();
+    //     if (n < 0 || n > 100)
+    //         PrintString(
+    //             "n has to be an integer between 1 and 100 (inclusive), please "
+    //             "try again\n");
+    // } while (n < 0 || n > 100);
+
+    // for (i = 0; i < n; i++) {
+    //     PrintString("Enter a[");
+    //     PrintNum(i);
+    //     PrintString("]: ");
+    //     a[i] = ReadNum();
+    // }
+
     int n = 0;
+    int i, j, choose, temp = 0;
+    int arr[MAX_LENGTH + 1];
     do{
         PrintString("Length of array(It's need smaller 100): ");
         n = ReadNum();
     }
-    while(n <= MAX_LENGTH);
-    int arr[n];
+    while(n > MAX_LENGTH || n < 0);
 
-    for(int i = 0; i < n; i++){
-        int temp = 0;
-        PrintString("a[");
+    for(i = 0; i < n; i++){
+        PrintString("Enter arr[");
         PrintNum(i);
-        PrintString("] = ");
-        temp = ReadNum();
-        arr[i] = temp;       
+        PrintString("]: ");
+        arr[i] = ReadNum();
     }
 
-    int case;
     do{
         PrintString("You want sort array to increase(1) or decrease(0): "); 
-        case = ReadString();
-    }while(case != 0 || case != 1)
+        choose = ReadNum();
+    }while(choose != 0 || choose != 1);
 
-    int temp = 0;
-    if(case == 1){
+    if(choose == 1){
         // Sắp xếp tăng dần
-        for (int i = 0; i < n - 1; i++){
-            for (int j = 0; j < n - i - 1; j++)
+        for (i = 0; i < n - 1; i++){
+            for (j = 0; j < n - i - 1; j++)
             {
                 if (arr[j] > arr[j + 1])
                 {
@@ -46,8 +61,8 @@ int main(){
     }
     else{
         // Sắp xếp giảm dần
-        for (int i = 0; i < n - 1; i++){
-            for (int j = 0; j < n - i - 1; j++)
+        for (i = 0; i < n - 1; i++){
+            for (j = 0; j < n - i - 1; j++)
             {
                 if (arr[j] < arr[j + 1])
                 {
@@ -60,7 +75,7 @@ int main(){
     }
 
     PrintString("Array after sort: ");
-    for(int i = 0; i < n; i++){
+    for(i = 0; i < n; i++){
         PrintNum(arr[i]);
         PrintChar(' ');
     }
