@@ -195,12 +195,15 @@ void SysReadString(char* string, int len) {
 void SysPrintString(char* string){
   int len;
   len = 0;
+  //nếu chuỗi rỗng thì dừng 
   if(!string) return;
+  //xuất ra màn hình tới khi nào gặp kí tự '\0' thì dừng
   while (string[len] != '\0')
   {
     SysPrintChar(string[len]);
     len++;
   }
+  //in kí tự '\0' 
   SysPrintChar(string[len]);
 }
 
