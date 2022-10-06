@@ -13,6 +13,6 @@ int main(){
     PrintString("bước 2: nhập vào dãy số LƯU Ý: nhập từng số một không nhập lần nhiều số.\n");
     PrintString("bước 3: lựa chọn sắp xếp theo chiều tăng dần hoặc giam dần\n");
     PrintString("chương trình sẽ tự động in ra dãy số nhập vào ở bước 2 và kiểu sắp xếp ở bước 3\n\n\n");
-
+    
     Halt();
 }
