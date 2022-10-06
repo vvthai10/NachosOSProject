@@ -177,6 +177,12 @@ help: help.o help.o
 	$(LD) $(LDFLAGS) start.o help.o -o help.coff
 	$(COFF2NOFF) help.coff help
 
+readprintstring.o: readprintstring.c
+	$(CC) $(CFLAGS) -c readprintstring.c
+readprintstring: readprintstring.o readprintstring.o
+	$(LD) $(LDFLAGS) start.o readprintstring.o -o readprintstring.coff
+	$(COFF2NOFF) readprintstring.coff readprintstring
+
 clean:
 	$(RM) -f *.o *.ii
 	$(RM) -f *.coff

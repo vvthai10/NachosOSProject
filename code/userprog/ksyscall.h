@@ -178,14 +178,15 @@ void SysReadString(char* string, int len) {
   int i;
   i=0;
 
-
+  //đọc tới len kí tự hoặc tới khi kết thúc chuỗi nhập
   for(;i < len; i++){
     c = SysReadChar();
+    //khi người dung nhấn enter thì sẽ dừng đọc
     if(c==LF) break;
     string[i] = c;
   }
   
-    
+  //gán kí tự '\0' vào cuối chuỗi nhập
   string[i] = '\0';
 
   return;

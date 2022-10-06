@@ -158,11 +158,12 @@ void HandleSyscallReadString(){
 	DEBUG(dbgSys,"chuoi nhap vao la: " << buffer);
 	//trả chuỗi về vùng nhớ mà người dùng có thể truy cập (user space)
 	System2User(virAdd,len,buffer);
+	
 	return;
 }
 
 void HandleSyscallPrintString(){
-	virAdd = kernel->machine->ReadRegister(4);
+	int virAdd = kernel->machine->ReadRegister(4);
 	//chuyển chuỗi xuông vùng kernel space để HĐH xử lý
 	//chuỗi chỉ được tối đa 255 kí tự
 	char* inputString ;
