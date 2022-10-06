@@ -168,6 +168,7 @@ char SysReadChar() {
 }
 
 void SysPrintChar(char c) {
+  //xuất kí tự c ra màn hình
   kernel->synchConsoleOut->PutChar(c);
 }
 

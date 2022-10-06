@@ -115,6 +115,64 @@ void HandleSyscallPrintNum(){
 	return;
 }
 
+void HandleSyscallReadChar(){
+	char character;
+	// đọc một kí tự do người dùng nhập vào;
+	//nếu người dùng nhập vào hơn 1 kí tự thì sẽ đọc kí tự đầu tiên
+	character = SysReadChar();
+	kernel->machine->WriteRegister(2, character);
+	return;
+}
+
+void HandleSyscallPrintChar(){
+	char inputCh;
+	//đọc kí tự do người dùng truyền vào
+	inputCh = kernel->machine->ReadRegister(4);
+	//xuất ra màn hình
+	SysPrintChar(inputCh);
+	return;
+}
+void HandleSyscallRandomNum(){
+	int ranNum;
+	//lấy một số ngẫu nhiên 
+	srand((int)time(NULL));
+	ranNum =  rand();
+	//trả kết quả về
+	kernel->machine->WriteRegister(2, ranNum);
+	return;
+}
+
+void HandleSyscallReadString(){
+	int virAdd;
+	int len;
+	virAdd = kernel->machine->ReadRegister(4);
+	len = kernel->machine->ReadRegister(5);
+	DEBUG(dbgSys,"do dai chuoi muon doc la: " << len << "\n");
+	DEBUG(dbgSys,"dia chi vung chua chuoi la: " << virAdd << "\n");
+	
+	char* buffer;
+	buffer = new char[len+1];
+	//đọc chuỗi do người dùng nhập vào
+	//chuỗi sẻ lưu vào vùng nhớ do hệ điều hành quản lý (kernel space)
+	SysReadString(buffer,len);
+	DEBUG(dbgSys,"chuoi nhap vao la: " << buffer);
+	//trả chuỗi về vùng nhớ mà người dùng có thể truy cập (user space)
+	System2User(virAdd,len,buffer);
+	return;
+}
+
+void HandleSyscallPrintString(){
+	virAdd = kernel->machine->ReadRegister(4);
+	//chuyển chuỗi xuông vùng kernel space để HĐH xử lý
+	//chuỗi chỉ được tối đa 255 kí tự
+	char* inputString ;
+	inputString = User2System(virAdd,255);
+	DEBUG(dbgSys,"chuoi xuat ra man hinh la: " << inputString << "\n");
+	//xuất ra màn hình
+	SysPrintString(inputString);
+	return;
+}
+
 void ExceptionHandler(ExceptionType which)
 {
 	int type = kernel->machine->ReadRegister(2);
@@ -164,53 +222,28 @@ void ExceptionHandler(ExceptionType which)
 			return;
 			break;
 		case SC_ReadChar:
-			char character;
-			character = SysReadChar();
-			kernel->machine->WriteRegister(2, character);
-
+			HandleSyscallReadChar();
 			increasePC();
 			return;
 			break;
 		case SC_PrintChar:
-			char inputCh;
-			inputCh = kernel->machine->ReadRegister(4);
-			SysPrintChar(inputCh);
+			HandleSyscallPrintChar();
 			increasePC();
 			return;
 			break;
 		case SC_RandomNum:
-			int ranNum;
-			srand((int)time(NULL));
-			ranNum =  rand() % 10000;
-			kernel->machine->WriteRegister(2, ranNum);
+			HandleSyscallRandomNum();
 			increasePC();
 			return;
 			break;
 		case SC_ReadString:
-			int virAdd;
-			int len;
-			virAdd = kernel->machine->ReadRegister(4);
-			len = kernel->machine->ReadRegister(5);
-			DEBUG(dbgSys,"do dai chuoi muon doc la: " << len << "\n");
-			DEBUG(dbgSys,"dia chi vung chua chuoi la: " << virAdd << "\n");
-			
-			char* buffer;
-			buffer = new char[len+1];
-			SysReadString(buffer,len);
-			DEBUG(dbgSys,"chuoi nhap vao la: " << buffer)
-			System2User(virAdd,len,buffer);
-			
+			HandleSyscallReadString();
 			increasePC();
 			return;
 
 			break;
 		case SC_PrintString:
-			
-			virAdd = kernel->machine->ReadRegister(4);
-			char* inputString ;
-			inputString = User2System(virAdd,255);
-			DEBUG(dbgSys,"chuoi xuat ra man hinh la: " << inputString << "\n");
-			SysPrintString(inputString);
+			HandleSyscallPrintString();
 			increasePC();
 			return;
 			break;
@@ -221,7 +254,7 @@ void ExceptionHandler(ExceptionType which)
 
 		break;
 	case PageFaultException:
-		printf("sadasfafas");
+		printf("PageFaultException\n");
 		SysHalt();
 		break;
 	case ReadOnlyException:
@@ -229,24 +262,24 @@ void ExceptionHandler(ExceptionType which)
 		SysHalt();
 		break;
 	case BusErrorException:
-		printf("BusErrorException");
+		printf("BusErrorException\n");
 		SysHalt();
 		break;
 	case AddressErrorException:
-		printf("AddressErrorException");
+		printf("AddressErrorException\n");
 		SysHalt();
 		break;
 	case OverflowException:
-		printf("OverflowException");
+		printf("OverflowException\n");
 		SysHalt();
 		break;
 	case IllegalInstrException:
-		printf("IllegalInstrException");
+		printf("IllegalInstrException\n");
 		SysHalt();
 		return;
 		break;
 	case NumExceptionTypes:
-		printf("NumExceptionTypes");
+		printf("NumExceptionTypes\n");
 		SysHalt();
 		return;
 		break;
