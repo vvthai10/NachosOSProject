@@ -14,7 +14,7 @@ main()
   
   // result = Add(42, 23);
   result = ReadNum();
-
+  PrintNum(result);
   // Always use halt() because don't create sysExit
   Halt();
 }

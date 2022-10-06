@@ -10,11 +10,11 @@
 
 #ifndef __USERPROG_KSYSCALL_H__ 
 #define __USERPROG_KSYSCALL_H__ 
-
+#define __STDC_LIMIT_MACROS
 
 #include "kernel.h"
 #include "synchconsole.h"
-#include "stdlib.h"
+#include <stdint.h>
 
 #define LF ((char)10)
 #define CR ((char)13)
@@ -92,37 +92,40 @@ int SysReadNum()
     return 0;
   }
 
-  // Trường hợp check ngoài giới hạn int sẽ gán sau
-  // Trường hợp nhập vào là 0000006
-  DEBUG(dbgSys, "Length: " << length << "\n");
-  if (length == 10){
-    char valueCheck[11];
-    strncpy(valueCheck, numberInput, 10);
-    valueCheck[10] = '\0';
-    DEBUG(dbgSys, "Value need check: " << valueCheck << "\n");
-    if(isNegative)
-    {
-      // bool isSmallerMin = false;
-      
-      DEBUG(dbgSys, "Compare with -2147483648: " << strcmp(numberInput, "-2147483648") << "\n");
-    }
-    else
-    {  
-      // bool isLargerMax = false;
-      DEBUG(dbgSys, "Compare with 2147483647: "<< strcmp("2147483647", "2147483647") << "\n");
-      DEBUG(dbgSys, "Compare with 2147483647: "<< strcmp(numberInput, "2147483647") << "\n");
-    }
-  }
-
   int num = 0;
   for(int i = 0; i < length; i++){
 
-    num = num * 10 + (numberInput[i] - '0');
-    DEBUG(dbgSys, "Result: " << num << "\n");
+    int temp = (numberInput[i] - '0');
+    if(isNegative){
+      DEBUG(dbgSys, "calc -");
+      if(num == 214748364 && temp == 8){
+        
+        DEBUG(dbgSys, "Value is equal INT_MIN: " << INT32_MIN << "\n");
+        return INT32_MIN;
+      }
+      else if((num == 214748364 && temp > 8) || num > 214748364){
+        DEBUG(dbgSys, "Value is out range of INT: " << 0 << "\n");
+        return 0;
+      }
+    }
+    else{
+      DEBUG(dbgSys, "calc +");
+      if(num == 214748364 && temp == 7){
+        DEBUG(dbgSys, "Value is equal INT_MAX: " << INT32_MAX << "\n");
+        return INT32_MAX;
+      }
+      else if((num == 214748364 && temp > 7) || num > 214748364){
+        DEBUG(dbgSys, "Value is out range of INT: " << 0 << "\n");
+        return 0;
+      }
+    }
 
+    num = num * 10 + temp;
   }
 
-  DEBUG(dbgSys, "Result: " << num << "\n");
+  DEBUG(dbgSys, isNegative);
+  num = (isNegative) ? -num : num;
+  DEBUG(dbgSys, "Final result: " << num << "\n");
 
   return num;
 }
@@ -135,12 +138,13 @@ void SysPrintNum(int number) {
       return;
     }
 
-    // if (num == INT32_MIN) {
-    //     kernel->synchConsoleOut->PutChar('-');
-    //     for (int i = 0; i < 10; ++i)
-    //         kernel->synchConsoleOut->PutChar("2147483648"[i]);
-    //     return;
-    // }
+    if (number == INT32_MIN) {
+        kernel->synchConsoleOut->PutChar('-');
+        char intMin[11] = "2147483648";
+        for (int i = 0; i < 11; ++i)
+            kernel->synchConsoleOut->PutChar(intMin[i]);
+        return;
+    }
 
     if (number < 0) {
         kernel->synchConsoleOut->PutChar('-');
