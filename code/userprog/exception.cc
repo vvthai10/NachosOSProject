@@ -143,8 +143,8 @@ void HandleSyscallRandomNum(){
 }
 
 void HandleSyscallReadString(){
-	int virAdd;
-	int len;
+	int virAdd;	//địa chỉ vùng nhớ thuộc quyền user sẽ lưu chuỗi nhập vào
+	int len;	//chiều dài cần đọc 
 	virAdd = kernel->machine->ReadRegister(4);
 	len = kernel->machine->ReadRegister(5);
 	DEBUG(dbgSys,"do dai chuoi muon doc la: " << len << "\n");
@@ -165,8 +165,8 @@ void HandleSyscallReadString(){
 void HandleSyscallPrintString(){
 	int virAdd = kernel->machine->ReadRegister(4);
 	//chuyển chuỗi xuông vùng kernel space để HĐH xử lý
-	//chuỗi chỉ được tối đa 255 kí tự
 	char* inputString ;
+	//chỉ đọc chuỗi tối đa 255 kí tự
 	inputString = User2System(virAdd,255);
 	DEBUG(dbgSys,"chuoi xuat ra man hinh la: " << inputString << "\n");
 	//xuất ra màn hình

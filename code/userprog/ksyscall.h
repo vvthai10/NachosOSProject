@@ -160,18 +160,19 @@ void SysPrintNum(int number) {
         kernel->synchConsoleOut->PutChar(numberPrint[i] + '0');
     }
 }
-
+//đọc 1 kí tư do người dùng nhập vào
 char SysReadChar() {
   char c;
   c = kernel->synchConsoleIn->GetChar();
   return c;
 }
-
+//xuất 1 kí tự do người dùng nhập vào
 void SysPrintChar(char c) {
   //xuất kí tự c ra màn hình
   kernel->synchConsoleOut->PutChar(c);
 }
-
+//đọc len kí tự do người dùng nhập vào hoặc đọc hết tất cả
+//kí tự do người dùng nhập vào nếu len >= chiều dài chuỗi ngươi dùng nhập 
 void SysReadString(char* string, int len) {
 
   char c;
@@ -180,6 +181,7 @@ void SysReadString(char* string, int len) {
 
   //đọc tới len kí tự hoặc tới khi kết thúc chuỗi nhập
   for(;i < len; i++){
+    
     c = SysReadChar();
     //khi người dung nhấn enter thì sẽ dừng đọc
     if(c==LF) break;
@@ -191,7 +193,7 @@ void SysReadString(char* string, int len) {
 
   return;
 }
-
+//xuất chuỗi string ra màn hình
 void SysPrintString(char* string){
   int len;
   len = 0;
