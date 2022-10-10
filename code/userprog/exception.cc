@@ -147,15 +147,15 @@ void HandleSyscallReadString(){
 	int len;
 	virAdd = kernel->machine->ReadRegister(4);
 	len = kernel->machine->ReadRegister(5);
-	DEBUG(dbgSys,"do dai chuoi muon doc la: " << len << "\n");
-	DEBUG(dbgSys,"dia chi vung chua chuoi la: " << virAdd << "\n");
+	DEBUG(dbgSys,"Do dai chuoi muon doc la: " << len << "\n");
+	DEBUG(dbgSys,"Dia chi vung chua chuoi la: " << virAdd << "\n");
 	
 	char* buffer;
 	buffer = new char[len+1];
 	//đọc chuỗi do người dùng nhập vào
 	//chuỗi sẻ lưu vào vùng nhớ do hệ điều hành quản lý (kernel space)
 	SysReadString(buffer,len);
-	DEBUG(dbgSys,"chuoi nhap vao la: " << buffer);
+	DEBUG(dbgSys,"Chuoi nhap vao la: " << buffer);
 	//trả chuỗi về vùng nhớ mà người dùng có thể truy cập (user space)
 	System2User(virAdd,len,buffer);
 	
@@ -168,7 +168,7 @@ void HandleSyscallPrintString(){
 	//chuỗi chỉ được tối đa 255 kí tự
 	char* inputString ;
 	inputString = User2System(virAdd,255);
-	DEBUG(dbgSys,"chuoi xuat ra man hinh la: " << inputString << "\n");
+	DEBUG(dbgSys,"Chuoi xuat ra man hinh la: " << inputString << "\n");
 	//xuất ra màn hình
 	SysPrintString(inputString);
 	return;

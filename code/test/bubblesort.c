@@ -14,19 +14,19 @@ int main(){
     }
     while(n > MAX_LENGTH || n < 0);
 
-    PrintString("N = ");
+    PrintString("\nN = ");
     PrintNum(n);
 
 
     for(i = 0; i < n; i++){
-        PrintString("Enter arr[");
+        PrintString("\nEnter arr[");
         PrintNum(i);
         PrintString("]: ");
         arr[i] = ReadNum();
     }
 
     do{
-        PrintString("You want sort array to increase(1) or decrease(0): "); 
+        PrintString("\nYou want sort array to increase(1) or decrease(0): "); 
         choose = ReadNum();
     }while(choose != 0 && choose != 1);
 
@@ -52,8 +52,8 @@ int main(){
             {
                 if (arr[j] < arr[j + 1])
                 {
-                    temp = arr[i];
-                    arr[i] = arr[j + 1];
+                    temp = arr[j];
+                    arr[j] = arr[j + 1];
                     arr[j + 1] = temp;
                 }
             }
