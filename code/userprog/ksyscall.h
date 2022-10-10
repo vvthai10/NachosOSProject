@@ -173,7 +173,6 @@ void SysPrintNum(int number) {
     for (int i = n - 1; i >= 0; --i){
         kernel->synchConsoleOut->PutChar(numberPrint[i] + '0');
     }
-    kernel->synchConsoleOut->PutChar('\n');
 }
 //đọc 1 kí tư do người dùng nhập vào
 char SysReadChar() {
