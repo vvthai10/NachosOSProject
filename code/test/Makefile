@@ -112,7 +112,7 @@ ifeq ($(hosttype),unknown)
 PROGRAMS = unknownhost
 else
 # change this if you create a new test program!
-PROGRAMS = add createfile halt shell matmult sort segments bubblesort readprintnum randomnum readprintchar readprintstring ascii
+PROGRAMS = add createfile halt shell matmult sort segments bubblesort readprintnum randomnum readprintchar readprintstring ascii help
 endif
 
 all: $(PROGRAMS)
@@ -171,12 +171,6 @@ matmult: matmult.o start.o
 	$(LD) $(LDFLAGS) start.o matmult.o -o matmult.coff
 	$(COFF2NOFF) matmult.coff matmult
 
-help.o: help.c
-	$(CC) $(CFLAGS) -c help.c
-help: help.o help.o
-	$(LD) $(LDFLAGS) start.o help.o -o help.coff
-	$(COFF2NOFF) help.coff help
-
 readprintnum.o: readprintnum.c
 	$(CC) $(CFLAGS) -c readprintnum.c
 readprintnum: readprintnum.o readprintnum.o
@@ -200,6 +194,18 @@ readprintstring.o: readprintstring.c
 readprintstring: readprintstring.o readprintstring.o
 	$(LD) $(LDFLAGS) start.o readprintstring.o -o readprintstring.coff
 	$(COFF2NOFF) readprintstring.coff readprintstring
+
+ascii.o: ascii.c
+	$(CC) $(CFLAGS) -c ascii.c
+ascii: ascii.o ascii.o
+	$(LD) $(LDFLAGS) start.o ascii.o -o ascii.coff
+	$(COFF2NOFF) ascii.coff ascii
+
+help.o: help.c
+	$(CC) $(CFLAGS) -c help.c
+help: help.o help.o
+	$(LD) $(LDFLAGS) start.o help.o -o help.coff
+	$(COFF2NOFF) help.coff help
 
 clean:
 	$(RM) -f *.o *.ii
