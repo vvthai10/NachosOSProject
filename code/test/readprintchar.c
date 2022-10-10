@@ -4,5 +4,5 @@ int main() {
     c = ReadChar();
     PrintChar(c);
 
-    Halt()
+    Halt();
 }

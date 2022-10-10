@@ -4,5 +4,5 @@ int main() {
     value = RandomNum();
     PrintNum(value);
 
-    Halt()
+    Halt();
 }
