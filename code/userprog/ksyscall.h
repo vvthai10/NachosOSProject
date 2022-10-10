@@ -43,28 +43,36 @@ int SysReadNum()
   char numberInput[MAX_LENGTH];
 
   int n = 0;
-  // int num = 0;
   bool isNegative = false;
   char c = kernel->synchConsoleIn->GetChar();
 
-  // Khi nhận kí tự enter thì kết thúc việc nhập
+  // Khi nhận kí tự enter thì kết thúc việc nhập, 
+  // tuy nhiên nếu người dùng vẫn cố nhập thì sẽ ghi lại vào vị trí 0 của mảng,
+  // đợi khi người dùng kết thúc nhập thì kiểm tra n với MAX_LENGTH thì sẽ trả lại 0.
   while (c != (char)10)
   {
     if(c == (char)'-' && n == 0){
       isNegative = true;
     }
-    else{
+    else if(n < MAX_LENGTH){
       numberInput[n++] = c;
     }
-    if (n > MAX_LENGTH)
+    // Khi số lượng kí tự vượt quá cũng đáng dấu -> trả về 0
+    else
     {
-      DEBUG(dbgSys, "Number is too long");
-      break;
+      DEBUG(dbgSys, "Number is too long.\n");
+      numberInput[0] = c;
     }
     c = kernel->synchConsoleIn->GetChar();
   }
 
+  if(n > MAX_LENGTH){
+    DEBUG(dbgSys, "Value return is zero\n");
+    return 0;
+  }
+
   // Bước 2:Xử lý các trường hợp sẽ gặp phải
+
   // Trường hợp độ dài chuỗi là rỗng.
   int length = n;
   if (length == 0)
@@ -92,6 +100,7 @@ int SysReadNum()
     return 0;
   }
 
+  // Kiểm tra các trường hợp số nhập vào tại các vị trí cực trị của khoảng giá trị INT
   int num = 0;
   for(int i = 0; i < length; i++){
 
@@ -109,7 +118,6 @@ int SysReadNum()
       }
     }
     else{
-      DEBUG(dbgSys, "calc +");
       if(num == 214748364 && temp == 7){
         DEBUG(dbgSys, "Value is equal INT_MAX: " << INT32_MAX << "\n");
         return INT32_MAX;
@@ -123,7 +131,6 @@ int SysReadNum()
     num = num * 10 + temp;
   }
 
-  DEBUG(dbgSys, isNegative);
   num = (isNegative) ? -num : num;
   DEBUG(dbgSys, "Final result: " << num << "\n");
 
@@ -138,6 +145,10 @@ void SysPrintNum(int number) {
       return;
     }
 
+    // Cần kiểm tra có bằng min hay không
+    // bởi vì cần chuyển số âm thành số nguyên rồi mới gán lại vào mảng char
+    // thì khi đổi thành số dương thì chỉ tối đa là 2147483647
+    // dẫn tới việc tràn số.
     if (number == INT32_MIN) {
         kernel->synchConsoleOut->PutChar('-');
         char intMin[11] = "2147483648";
@@ -146,10 +157,13 @@ void SysPrintNum(int number) {
         return;
     }
 
+    // Kiểm tra số âm
     if (number < 0) {
         kernel->synchConsoleOut->PutChar('-');
         number = -number;
     }
+
+    // Tiến hành in kết quả.
     int n = 0;
     char numberPrint[MAX_LENGTH];
     while (number) {
@@ -159,6 +173,7 @@ void SysPrintNum(int number) {
     for (int i = n - 1; i >= 0; --i){
         kernel->synchConsoleOut->PutChar(numberPrint[i] + '0');
     }
+    kernel->synchConsoleOut->PutChar('\n');
 }
 
 char SysReadChar() {
