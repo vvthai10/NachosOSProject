@@ -53,6 +53,9 @@
 //	"which" is the kind of exception.  The list of possible exceptions
 //	is in machine.h.
 //----------------------------------------------------------------------
+
+
+//tăng giá trị thành ghi PC
 void increasePC()
 {
 	/* set previous programm counter (debugging only)*/
@@ -64,7 +67,7 @@ void increasePC()
 	/* set next programm counter for brach execution */
 	kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
 }
-
+//copy chuỗi thuộc địa chỉ virtAddr của userspace sang kernelspace
 char *User2System(int virtAddr, int limit)
 {
 	int i; // index
@@ -85,7 +88,7 @@ char *User2System(int virtAddr, int limit)
 	}
 	return kernelBuf;
 }
-
+//Copy chuỗi từ System space sang User space
 int System2User(int virtAddr, int len, char *buffer)
 {
 	if (len < 0)
@@ -143,8 +146,8 @@ void HandleSyscallRandomNum(){
 }
 
 void HandleSyscallReadString(){
-	int virAdd;
-	int len;
+	int virAdd;	//địa chỉ vùng nhớ thuộc quyền user sẽ lưu chuỗi nhập vào
+	int len;	//chiều dài cần đọc 
 	virAdd = kernel->machine->ReadRegister(4);
 	len = kernel->machine->ReadRegister(5);
 	DEBUG(dbgSys,"Do dai chuoi muon doc la: " << len << "\n");
@@ -165,8 +168,8 @@ void HandleSyscallReadString(){
 void HandleSyscallPrintString(){
 	int virAdd = kernel->machine->ReadRegister(4);
 	//chuyển chuỗi xuông vùng kernel space để HĐH xử lý
-	//chuỗi chỉ được tối đa 255 kí tự
 	char* inputString ;
+	//chỉ đọc chuỗi tối đa 255 kí tự
 	inputString = User2System(virAdd,255);
 	DEBUG(dbgSys,"Chuoi xuat ra man hinh la: " << inputString << "\n");
 	//xuất ra màn hình
