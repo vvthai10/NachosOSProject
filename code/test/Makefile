@@ -112,7 +112,7 @@ ifeq ($(hosttype),unknown)
 PROGRAMS = unknownhost
 else
 # change this if you create a new test program!
-PROGRAMS = add createfile halt shell matmult sort segments bubblesort readprintnum randomnum readprintchar readprintstring
+PROGRAMS = add createfile halt shell matmult sort segments bubblesort readprintnum randomnum readprintchar readprintstring ascii
 endif
 
 all: $(PROGRAMS)
