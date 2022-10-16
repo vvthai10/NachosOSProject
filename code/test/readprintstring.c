@@ -2,8 +2,8 @@
 int main(){
     char* string;
     int len;
-    len = 5;
-    ReadString(string,len);
+    len = 255;
+    ReadString(string,255);
     PrintString(string);
 
     Halt();
