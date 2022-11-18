@@ -343,6 +343,7 @@ void ExceptionHandler(ExceptionType which)
 		{
 		case SC_Halt:
 			DEBUG(dbgSys, "Shutdown, initiated by user program.\n");
+			// DEBUG(dbgSys, "Shutdown, initiated by user program.\n");
 
 			SysHalt();
 

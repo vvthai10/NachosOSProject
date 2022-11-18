@@ -29,6 +29,9 @@
 					// See definitions listed under #else
 class OpenFile {
   public:
+	int type;
+	int descriptorId;
+
     OpenFile(int f) { file = f; currentOffset = 0; }	// open the file
     ~OpenFile() { Close(file); }			// close the file
 

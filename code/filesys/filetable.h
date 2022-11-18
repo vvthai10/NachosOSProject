@@ -115,7 +115,7 @@ class FileTable{
             if(id >= TABLE_LENGTH || id < 0){
                 return -1;
             }
-            if(openFiles[id] == NULL || filesType[id] == READ){
+            if(openFiles[id] == NULL || openFiles[id]->type == READ){
                 return -1;
             }
 
