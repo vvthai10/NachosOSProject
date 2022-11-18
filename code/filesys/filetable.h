@@ -88,9 +88,9 @@ class FileTable{
             if(openFiles[id] != NULL){
                 Close(openFiles[id]->descriptorId);
                 openFiles[id] = NULL;
-                openFiles[index] = NULL;
+                
                 //delete fileNames[index];
-                fileNames[index] = "D";
+                fileNames[id] = "D";
                 return 0;
             }
 
