@@ -14,7 +14,7 @@ class FileTable{
         OpenFile** openFiles;
         int* filesType;
         int *filesDescriptor;
-
+        char** fileNames;
     public:
         FileTable(){
             openFiles = new OpenFile*[TABLE_LENGTH];
@@ -23,6 +23,13 @@ class FileTable{
             filesType[CONSOLE_OUTPUT] = WRITE;
 
             filesDescriptor = new int[TABLE_LENGTH];
+            fileNames = new char*[TABLE_LENGTH];
+            for (int i = 0; i < TABLE_LENGTH; i++)
+            {
+                /* code */
+                fileNames[i] = NULL;
+            }
+            
         }
 
         ~FileTable(){
@@ -35,6 +42,13 @@ class FileTable{
             delete[] openFiles;
             delete[] filesType;
             delete[] filesDescriptor;
+            for (int i = 2; i < TABLE_LENGTH; i++)
+            {
+                if(fileNames[i] != NULL) {
+                    delete[] fileNames[i];
+                }
+            }
+            delete[] fileNames;
         }
 
         // Them file can mo vao bang
@@ -68,7 +82,8 @@ class FileTable{
             }
             openFiles[index] = new OpenFile(filesDescriptor[index]);
             filesType[index] = type;
-
+            fileNames[index] = new char[strlen(fileName)];
+            fileNames[index] = fileName;
             return index;
         }
 
@@ -81,6 +96,8 @@ class FileTable{
             if(openFiles[index] != NULL){
                 Close(filesDescriptor[index]);
                 openFiles[index] = NULL;
+                //delete fileNames[index];
+                fileNames[index] = "D";
                 return 0;
             }
 
@@ -94,5 +111,16 @@ class FileTable{
             if (pos == -1) pos = openFiles[index]->Length();
             if (pos < 0 || pos > openFiles[index]->Length()) return -1;
             return openFiles[index]->Seek(pos);
+        }
+
+        int IsFileOpen(char* fileName) {
+            for (int i = 2; i < TABLE_LENGTH; i++)
+            {
+                if(fileNames[i] == fileName) {
+                    return i;
+                }
+            }
+            return -1;
+            
         }
 };
