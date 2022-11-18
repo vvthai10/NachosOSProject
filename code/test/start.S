@@ -189,12 +189,6 @@ ReadNum:
 	.globl PrintNum
 	.ent	PrintNum
 PrintNum:
-<<<<<<< HEAD
-	addiu $2,$0,SC_PrintNum
-	syscall
-	j 	$31
-	.end PrintNum
-=======
 	addiu $2, $0, SC_PrintNum
 	syscall
 	j $31
@@ -247,7 +241,6 @@ CreateFile:
 	syscall
 	j	$31
 	.end CreateFile
->>>>>>> origin/main
 	
 /* dummy function to keep gcc happy */
         .globl  __main

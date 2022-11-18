@@ -242,10 +242,100 @@ void HandleSyscallCloseFile(){
 	kernel->machine->WriteRegister(2, check);
 	return;
 }
-// HANDLE SOME SYSTEMCALL
 
+void StringSys2User(char* str, int addr, int convert_length = -1) {
+    int length = (convert_length == -1 ? strlen(str) : convert_length);
+    for (int i = 0; i < length; i++) {
+        kernel->machine->WriteMem(addr + i, 1,
+                                  str[i]);  // copy characters to user space
+    }
+    kernel->machine->WriteMem(addr + length, 1, '\0');
+}
 
-// EXCEPTION HANDLER
+void HandleSyscallReadFile(){
+	int virtAddr = kernel->machine->ReadRegister(4); // address of input
+	int charCount = kernel->machine->ReadRegister(5);
+	int id = kernel->machine->ReadRegister(6);
+
+	char* buffer = User2System(virtAddr, 255);
+
+	DEBUG(dbgFile, "Read files " << id << "\n");
+
+	int check;
+	// Doc tu stdin
+	if(id == 0){
+		check = kernel->synchConsoleIn->GetString(buffer, charCount);
+	}
+
+	check = kernel->fileSystem->Read(buffer, charCount, id);
+
+	kernel->machine->WriteRegister(2, check);	
+	StringSys2User(buffer, virtAddr, charCount);
+
+	delete[] buffer;
+}
+
+void HandleSyscallWriteFile(){
+	int virtAddr = kernel->machine->ReadRegister(4);
+	int charCount = kernel->machine->ReadRegister(5);
+	int id = kernel->machine->ReadRegister(6);
+
+	char* buffer = User2System(virtAddr, 255);
+
+	DEBUG(dbgFile, "Write files " << id << "\n");
+	int check;
+	// Doc tu stdin
+	if(id == 1){
+		check = kernel->synchConsoleOut->PutString(buffer, charCount);
+	}
+
+	check = kernel->fileSystem->Write(buffer, charCount, id);
+
+	kernel->machine->WriteRegister(2, check);
+	StringSys2User(buffer, virtAddr, charCount);
+
+	delete[] buffer;
+}
+
+void HandleSyscallSeek() {
+	int pos = kernel->machine->ReadRegister(4);
+	int fileId =kernel->machine->ReadRegister(5);
+
+	kernel->machine->WriteRegister(2, SysSeek(pos,fileId));
+
+	return;
+}
+
+void HandleSyscallRemove() {
+	int virAddr = kernel->machine->ReadRegister(4);
+	char* fileName = User2System(virAddr,255);
+	if(strlen(fileName) == 0){
+		printf("File name empty.\n");
+		kernel->machine->WriteRegister(2, -1);
+		return;
+	}
+	else if(fileName == NULL){
+		printf("File name is more long.\n");
+		kernel->machine->WriteRegister(2, -1);
+		return;
+	}
+	if(kernel->fileSystem->IsFileOpen(fileName) != -1) {
+		printf("file is open \n");
+		delete[] fileName;
+		return;
+	}
+	
+	if(!kernel->fileSystem->Remove(fileName)){
+		printf("file doesn't exist\n");
+		kernel->machine->WriteRegister(2, -1);
+	}else {
+		printf("remove success");
+		kernel->machine->WriteRegister(2, 0);
+	}
+	delete[] fileName;
+	return;
+}
+
 void ExceptionHandler(ExceptionType which)
 {
 	int type = kernel->machine->ReadRegister(2);
@@ -259,6 +349,7 @@ void ExceptionHandler(ExceptionType which)
 		{
 		case SC_Halt:
 			DEBUG(dbgSys, "Shutdown, initiated by user program.\n");
+			// DEBUG(dbgSys, "Shutdown, initiated by user program.\n");
 
 			SysHalt();
 
@@ -283,8 +374,60 @@ void ExceptionHandler(ExceptionType which)
 			ASSERTNOTREACHED();
 		case SC_ReadNum:
 			HandleSyscallReadNum();
-			break;
-		
+			increasePC();
+			return;
+		case SC_PrintNum:
+			HandleSyscallPrintNum();
+			increasePC();
+			return;
+		case SC_ReadChar:
+			HandleSyscallReadChar();
+			increasePC();
+			return;
+		case SC_PrintChar:
+			HandleSyscallPrintChar();
+			increasePC();
+			return;
+		case SC_RandomNum:
+			HandleSyscallRandomNum();
+			increasePC();
+			return;
+		case SC_ReadString:
+			HandleSyscallReadString();
+			increasePC();
+			return;
+		case SC_PrintString:
+			HandleSyscallPrintString();
+			increasePC();
+			return;
+		case SC_CreateFile:
+			HandleSyscallCreateFile();
+			increasePC();
+			return;
+		case SC_Open:
+			HandleSyscallOpenFile();
+			increasePC();
+			return;
+		case SC_Close:
+			HandleSyscallCloseFile();
+			increasePC();
+			return;
+		case SC_Read:
+			HandleSyscallReadFile();
+			increasePC();
+			return;
+		case SC_Write:
+			HandleSyscallWriteFile();
+			increasePC();
+			return;
+		case SC_Seek:
+			HandleSyscallSeek();
+			increasePC();
+			return;
+		case SC_Remove:
+			HandleSyscallRemove();
+			increasePC();
+			return;
 		default:
 			cerr << "Unexpected system call " << type << "\n";
 			break;
