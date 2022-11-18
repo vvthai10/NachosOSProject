@@ -75,11 +75,18 @@ public:
 
 	int Open(char *name, int type)
 	{
-		return fileTable->Insert(name, type);
+		return fileTable->AddOpenFile(name, type);
 	}
 
 	int Close(int id){
-		return fileTable->Remove(id);
+		return fileTable->RemoveOpenFile(id);
+	}
+
+	int Read(char* buffer, int charCount, int id){
+		return fileTable->ReadFile(buffer, charCount, id);
+	}
+	int Write(char* buffer, int charCount, int id){
+		return fileTable->WriteFile(buffer, charCount, id);
 	}
 
 	int Seek(int position, int fileId) { return fileTable->Seek(position, fileId); }

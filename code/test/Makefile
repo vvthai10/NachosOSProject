@@ -206,7 +206,6 @@ test_seek.o: test_seek.c
 test_seek: test_seek.o test_seek.o
 	$(LD) $(LDFLAGS) start.o test_seek.o -o test_seek.coff
 	$(COFF2NOFF) test_seek.coff test_seek
-
 ascii.o: ascii.c
 	$(CC) $(CFLAGS) -c ascii.c
 ascii: ascii.o ascii.o

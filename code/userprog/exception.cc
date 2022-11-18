@@ -242,14 +242,70 @@ void HandleSyscallCloseFile(){
 	kernel->machine->WriteRegister(2, check);
 	return;
 }
+
+void StringSys2User(char* str, int addr, int convert_length = -1) {
+    int length = (convert_length == -1 ? strlen(str) : convert_length);
+    for (int i = 0; i < length; i++) {
+        kernel->machine->WriteMem(addr + i, 1,
+                                  str[i]);  // copy characters to user space
+    }
+    kernel->machine->WriteMem(addr + length, 1, '\0');
+}
+
+void HandleSyscallReadFile(){
+	int virtAddr = kernel->machine->ReadRegister(4); // address of input
+	int charCount = kernel->machine->ReadRegister(5);
+	int id = kernel->machine->ReadRegister(6);
+
+	char* buffer = User2System(virtAddr, 255);
+
+	DEBUG(dbgFile, "Read files " << id << "\n");
+
+	int check;
+	// Doc tu stdin
+	if(id == 0){
+		check = kernel->synchConsoleIn->GetString(buffer, charCount);
+	}
+
+	check = kernel->fileSystem->Read(buffer, charCount, id);
+
+	kernel->machine->WriteRegister(2, check);	
+	StringSys2User(buffer, virtAddr, charCount);
+
+	delete[] buffer;
+}
+
+void HandleSyscallWriteFile(){
+	int virtAddr = kernel->machine->ReadRegister(4);
+	int charCount = kernel->machine->ReadRegister(5);
+	int id = kernel->machine->ReadRegister(6);
+
+	char* buffer = User2System(virtAddr, 255);
+
+	DEBUG(dbgFile, "Write files " << id << "\n");
+	int check;
+	// Doc tu stdin
+	if(id == 1){
+		check = kernel->synchConsoleOut->PutString(buffer, charCount);
+	}
+
+	check = kernel->fileSystem->Write(buffer, charCount, id);
+
+	kernel->machine->WriteRegister(2, check);
+	StringSys2User(buffer, virtAddr, charCount);
+
+	delete[] buffer;
+}
+
 void HandleSyscallSeek() {
 	int pos = kernel->machine->ReadRegister(4);
 	int fileId =kernel->machine->ReadRegister(5);
 
 	kernel->machine->WriteRegister(2, SysSeek(pos,fileId));
-	
+
 	return;
 }
+
 void HandleSyscallRemove() {
 	int virAddr = kernel->machine->ReadRegister(4);
 	char* fileName = User2System(virAddr,255);
@@ -270,7 +326,7 @@ void HandleSyscallRemove() {
 	}
 	
 	if(!kernel->fileSystem->Remove(fileName)){
-		printf("file doesn't exist\n");
+		printf("cannot remove file is open\n");
 		kernel->machine->WriteRegister(2, -1);
 	}else {
 		printf("remove success");
@@ -279,6 +335,7 @@ void HandleSyscallRemove() {
 	delete[] fileName;
 	return;
 }
+
 void ExceptionHandler(ExceptionType which)
 {
 	int type = kernel->machine->ReadRegister(2);
@@ -292,6 +349,7 @@ void ExceptionHandler(ExceptionType which)
 		{
 		case SC_Halt:
 			DEBUG(dbgSys, "Shutdown, initiated by user program.\n");
+			// DEBUG(dbgSys, "Shutdown, initiated by user program.\n");
 
 			SysHalt();
 
@@ -352,6 +410,14 @@ void ExceptionHandler(ExceptionType which)
 			return;
 		case SC_Close:
 			HandleSyscallCloseFile();
+			increasePC();
+			return;
+		case SC_Read:
+			HandleSyscallReadFile();
+			increasePC();
+			return;
+		case SC_Write:
+			HandleSyscallWriteFile();
 			increasePC();
 			return;
 		case SC_Seek:
