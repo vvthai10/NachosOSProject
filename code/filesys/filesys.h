@@ -82,6 +82,8 @@ public:
 		return fileTable->Remove(id);
 	}
 
+	int Seek(int position, int fileId) { return fileTable->Seek(position, fileId); }
+
 	bool Remove(char *name) { return Unlink(name) == 0; }
 };
 

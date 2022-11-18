@@ -68,28 +68,31 @@ class FileTable{
             }
             openFiles[index] = new OpenFile(filesDescriptor[index]);
             filesType[index] = type;
-
-            return filesDescriptor[index];
+//return index??
+            return index;
         }
 
         // Xoa file khoi bang cac file dang mo
-        int Remove(int fileDescriptor){
-            int index = -1;
-            for(int i = 2; i < TABLE_LENGTH; i++){
-                if(filesDescriptor[i] == fileDescriptor){
-                    index = i;
-                    break;
-                }
-            }
+        int Remove(int index){
             if(index < 2 || index >= TABLE_LENGTH) {
                 return -1;
             }
             if(openFiles[index] != NULL){
                 Close(fileDescriptor);
+                Close(filesDescriptor[index]);
                 openFiles[index] = NULL;
                 return 0;
             }
 
             return -1;
+        }
+        //index of openfile in table
+        int Seek(int pos, int index) {
+            if (index <= 1 || index >= TABLE_LENGTH) return -1;
+            if (openFiles[index] == NULL) return -1;
+            // use seek(-1) to move to the end of file
+            if (pos == -1) pos = openFiles[index]->Length();
+            if (pos < 0 || pos > openFiles[index]->Length()) return -1;
+            return openFiles[index]->Seek(pos);
         }
 };
