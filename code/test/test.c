@@ -1,12 +1,13 @@
 #include"syscall.h"
 int main() {
-    // int check = CreateFile("index.txt");
-    // int check1 = CreateFile("tung.txt");
-    // int check2 = CreateFile("mtp.txt");
+    int check = CreateFile("index.txt");
+    int check1 = CreateFile("tung.txt");
+    int check2 = CreateFile("mtp.txt");
     
     char fileName[] = "mtp.txt";
     char fileName1[] = "tung.txt";
     // int i;
+>>>>>>> 674904582b932696e88aaa777420d8ab02f627d4
     int id;
 
     // for(i = 0; i < 20; i++){
@@ -15,6 +16,22 @@ int main() {
     //         PrintString("File ");
     //         PrintString(fileName);
     //         PrintString(" open successful\n");
+<<<<<<< HEAD
+
+    //         PrintString("File descriptor id: ");
+    //         PrintNum(id);
+    //         PrintString("\n");
+    //         PrintString("current positon is: ");
+    //         PrintNum(Seek(-1,id));
+    //         PrintString("\n");
+    //         Close(id);
+    //     }
+    //     else{
+    //         PrintString("Open file failed\n");
+    //     }
+    // }
+    Remove("index.txt");
+=======
 
     //         PrintString("\tFile descriptor id: ");
     //         PrintNum(id);
@@ -121,10 +138,8 @@ int main() {
     for (i = 0; i < len; ++i) {
         buffer[i] = 0;
     }
-    Read(buffer, 50, 0);
-    len = 0;
-    while (buffer[len] != '\0') ++len;
-    PrintNum(Write(buffer, len, 1));
-
+    else{
+        PrintString("Open file failed\n");
+    }
     Halt();
 }

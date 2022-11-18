@@ -89,7 +89,12 @@ public:
 		return fileTable->WriteFile(buffer, charCount, id);
 	}
 
+	int Seek(int position, int fileId) { return fileTable->Seek(position, fileId); }
+
 	bool Remove(char *name) { return Unlink(name) == 0; }
+	int IsFileOpen(char* fileName) {
+		return fileTable->IsFileOpen(fileName);
+	}
 };
 
 #else // FILESYS
