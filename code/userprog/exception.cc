@@ -54,8 +54,7 @@
 //	is in machine.h.
 //----------------------------------------------------------------------
 
-
-//tăng giá trị thành ghi PC
+// tăng giá trị thành ghi PC
 
 void increasePC()
 {
@@ -68,7 +67,7 @@ void increasePC()
 	/* set next programm counter for brach execution */
 	kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
 }
-//copy chuỗi thuộc địa chỉ virtAddr của userspace sang kernelspace
+// copy chuỗi thuộc địa chỉ virtAddr của userspace sang kernelspace
 char *User2System(int virtAddr, int limit)
 {
 	int i; // index
@@ -89,7 +88,7 @@ char *User2System(int virtAddr, int limit)
 	}
 	return kernelBuf;
 }
-//Copy chuỗi từ System space sang User space
+// Copy chuỗi từ System space sang User space
 int System2User(int virtAddr, int len, char *buffer)
 {
 	if (len < 0)
@@ -107,96 +106,109 @@ int System2User(int virtAddr, int len, char *buffer)
 	return i;
 }
 
-void HandleSyscallReadNum(){
+void HandleSyscallReadNum()
+{
 	int result = SysReadNum();
 	kernel->machine->WriteRegister(2, result);
 	return;
 }
 
-void HandleSyscallPrintNum(){
+void HandleSyscallPrintNum()
+{
 	int numberPrint = kernel->machine->ReadRegister(4);
-    SysPrintNum(numberPrint);
+	SysPrintNum(numberPrint);
 	return;
 }
 
-void HandleSyscallReadChar(){
+void HandleSyscallReadChar()
+{
 	char character;
 	// đọc một kí tự do người dùng nhập vào;
-	//nếu người dùng nhập vào hơn 1 kí tự thì sẽ đọc kí tự đầu tiên
+	// nếu người dùng nhập vào hơn 1 kí tự thì sẽ đọc kí tự đầu tiên
 	character = SysReadChar();
 	kernel->machine->WriteRegister(2, character);
 	return;
 }
 
-void HandleSyscallPrintChar(){
+void HandleSyscallPrintChar()
+{
 	char inputCh;
 	//đọc kí tự do người dùng truyền vào
 	inputCh = kernel->machine->ReadRegister(4);
-	//xuất ra màn hình
+	// xuất ra màn hình
 	SysPrintChar(inputCh);
 	return;
 }
-void HandleSyscallRandomNum(){
+void HandleSyscallRandomNum()
+{
 	int ranNum;
-	//lấy một số ngẫu nhiên 
+	// lấy một số ngẫu nhiên
 	srand((int)time(NULL));
-	ranNum =  rand();
-	//trả kết quả về
+	ranNum = rand();
+	// trả kết quả về
 	kernel->machine->WriteRegister(2, ranNum);
 	return;
 }
 
-void HandleSyscallReadString(){
-	int virtAddr;	//địa chỉ vùng nhớ thuộc quyền user sẽ lưu chuỗi nhập vào
-	int len;	//chiều dài cần đọc 
+void HandleSyscallReadString()
+{
+	int virtAddr; //địa chỉ vùng nhớ thuộc quyền user sẽ lưu chuỗi nhập vào
+	int len;	  // chiều dài cần đọc
 	virtAddr = kernel->machine->ReadRegister(4);
 	len = kernel->machine->ReadRegister(5);
-	DEBUG(dbgSys,"Do dai chuoi muon doc la: " << len << "\n");
-	DEBUG(dbgSys,"Dia chi vung chua chuoi la: " << virtAddr << "\n");
-	
-	char* buffer;
-	buffer = new char[len+1];
+	DEBUG(dbgSys, "Do dai chuoi muon doc la: " << len << "\n");
+	DEBUG(dbgSys, "Dia chi vung chua chuoi la: " << virtAddr << "\n");
+
+	char *buffer;
+	buffer = new char[len + 1];
 	//đọc chuỗi do người dùng nhập vào
-	//chuỗi sẻ lưu vào vùng nhớ do hệ điều hành quản lý (kernel space)
-	SysReadString(buffer,len);
-	DEBUG(dbgSys,"Chuoi nhap vao la: " << buffer);
-	//trả chuỗi về vùng nhớ mà người dùng có thể truy cập (user space)
-	System2User(virtAddr,len,buffer);
-	
+	// chuỗi sẻ lưu vào vùng nhớ do hệ điều hành quản lý (kernel space)
+	SysReadString(buffer, len);
+	DEBUG(dbgSys, "Chuoi nhap vao la: " << buffer);
+	// trả chuỗi về vùng nhớ mà người dùng có thể truy cập (user space)
+	System2User(virtAddr, len, buffer);
+
 	return;
 }
 
-void HandleSyscallPrintString(){
+void HandleSyscallPrintString()
+{
 	int virtAddr = kernel->machine->ReadRegister(4);
-	//chuyển chuỗi xuông vùng kernel space để HĐH xử lý
-	char* inputString ;
-	//chỉ đọc chuỗi tối đa 255 kí tự
-	inputString = User2System(virtAddr,255);
-	DEBUG(dbgSys,"Chuoi xuat ra man hinh la: " << inputString << "\n");
-	//xuất ra màn hình
+	// chuyển chuỗi xuông vùng kernel space để HĐH xử lý
+	char *inputString;
+	// chỉ đọc chuỗi tối đa 255 kí tự
+	inputString = User2System(virtAddr, 255);
+	DEBUG(dbgSys, "Chuoi xuat ra man hinh la: " << inputString << "\n");
+	// xuất ra màn hình
 	SysPrintString(inputString);
 	return;
 }
 
-void HandleSyscallCreateFile(){
-	int virtAddr = kernel->machine->ReadRegister(4); 
+void HandleSyscallCreateFile()
+{
+	int virtAddr = kernel->machine->ReadRegister(4);
 	// NOTE: Do dai toi da cho file name la 32
-	char* fileName = User2System(virtAddr,255);
+	char *fileName = User2System(virtAddr, 255);
 
-	if(strlen(fileName) == 0){
+	if (strlen(fileName) == 0)
+	{
 		printf("File name empty.\n");
 		kernel->machine->WriteRegister(2, -1);
 	}
-	else if(fileName == NULL){
+	else if (fileName == NULL)
+	{
 		printf("File name is more long.\n");
 		kernel->machine->WriteRegister(2, -1);
 	}
-	else{
-		if(!kernel->fileSystem->Create(fileName)){
+	else
+	{
+		if (!kernel->fileSystem->Create(fileName))
+		{
 			printf("File is not create.\n");
 			kernel->machine->WriteRegister(2, -1);
 		}
-		else{
+		else
+		{
 			printf("Create file successful.\n");
 			kernel->machine->WriteRegister(2, 0);
 		}
@@ -205,87 +217,97 @@ void HandleSyscallCreateFile(){
 	delete[] fileName;
 }
 
-void HandleSyscallOpenFile(){
+void HandleSyscallOpenFile()
+{
 	DEBUG(dbgSys, "Start open file.\n");
 	int virtAddr = kernel->machine->ReadRegister(4);
 	int type = kernel->machine->ReadRegister(5);
 
-	char* fileName = User2System(virtAddr, 255);
+	char *fileName = User2System(virtAddr, 255);
 	DEBUG(dbgSys, "\tFile name: " << fileName << "\n");
 
-	if(type != 0 && type != 1){
+	if (type != 0 && type != 1)
+	{
 		DEBUG(dbgSys, "\tType is incorrect. Not open file.\n");
 		kernel->machine->WriteRegister(2, -1);
 		delete fileName;
 		return;
 	}
 	int id = kernel->fileSystem->Open(fileName, type);
-	if(id == -1){
+	if (id == -1)
+	{
 		DEBUG(dbgSys, "\tNot open file, some error: full table, file don't exist,...\n");
 		kernel->machine->WriteRegister(2, -1);
 		delete fileName;
 		return;
 	}
 	DEBUG(dbgSys, "\tOpen file '" << fileName << "' successful\n");
-	
+
 	kernel->machine->WriteRegister(2, id);
 	delete fileName;
 }
 
-void HandleSyscallCloseFile(){
+void HandleSyscallCloseFile()
+{
 	DEBUG(dbgSys, "Start close file.\n");
 	int fileDescriptor = kernel->machine->ReadRegister(4);
 	DEBUG(dbgSys, "\tFile descriptor id: " << fileDescriptor << "\n");
 	int check = kernel->fileSystem->Close(fileDescriptor);
 
-	DEBUG(dbgSys,"\tCheck process: " << check);
+	DEBUG(dbgSys, "\tCheck process: " << check);
 	kernel->machine->WriteRegister(2, check);
 	return;
 }
 
-void StringSys2User(char* str, int addr, int convert_length = -1) {
-    int length = (convert_length == -1 ? strlen(str) : convert_length);
-    for (int i = 0; i < length; i++) {
-        kernel->machine->WriteMem(addr + i, 1,
-                                  str[i]);  // copy characters to user space
-    }
-    kernel->machine->WriteMem(addr + length, 1, '\0');
+void StringSys2User(char *str, int addr, int convert_length = -1)
+{
+	int length = (convert_length == -1 ? strlen(str) : convert_length);
+	for (int i = 0; i < length; i++)
+	{
+		kernel->machine->WriteMem(addr + i, 1,
+								  str[i]); // copy characters to user space
+	}
+	kernel->machine->WriteMem(addr + length, 1, '\0');
 }
 
-void HandleSyscallReadFile(){
-	int virtAddr = kernel->machine->ReadRegister(4); // address of input
-	int charCount = kernel->machine->ReadRegister(5);
-	int id = kernel->machine->ReadRegister(6);
+void HandleSyscallReadFile()
+{
+	int virtAddr = kernel->machine->ReadRegister(4);  // address of input
+	int charCount = kernel->machine->ReadRegister(5); // ??
+	int id = kernel->machine->ReadRegister(6);		  // ?
 
-	char* buffer = User2System(virtAddr, 255);
+	char *buffer = User2System(virtAddr, 255);
 
 	DEBUG(dbgFile, "Read files " << id << "\n");
 
 	int check;
 	// Doc tu stdin
-	if(id == 0){
+	if (id == 0)
+	{
 		check = kernel->synchConsoleIn->GetString(buffer, charCount);
 	}
 
 	check = kernel->fileSystem->Read(buffer, charCount, id);
 
-	kernel->machine->WriteRegister(2, check);	
+	kernel->machine->WriteRegister(2, check);
 	StringSys2User(buffer, virtAddr, charCount);
 
 	delete[] buffer;
 }
 
-void HandleSyscallWriteFile(){
+void HandleSyscallWriteFile()
+{
 	int virtAddr = kernel->machine->ReadRegister(4);
 	int charCount = kernel->machine->ReadRegister(5);
 	int id = kernel->machine->ReadRegister(6);
 
-	char* buffer = User2System(virtAddr, 255);
+	char *buffer = User2System(virtAddr, 255);
 
 	DEBUG(dbgFile, "Write files " << id << "\n");
 	int check;
 	// Doc tu stdin
-	if(id == 1){
+	if (id == 1)
+	{
 		check = kernel->synchConsoleOut->PutString(buffer, charCount);
 	}
 
@@ -297,32 +319,39 @@ void HandleSyscallWriteFile(){
 	delete[] buffer;
 }
 
-void HandleSyscallSeek() {
+void HandleSyscallSeek()
+{
 	int pos = kernel->machine->ReadRegister(4);
-	int fileId =kernel->machine->ReadRegister(5);
+	int fileId = kernel->machine->ReadRegister(5);
 
-	kernel->machine->WriteRegister(2, SysSeek(pos,fileId));
+	kernel->machine->WriteRegister(2, SysSeek(pos, fileId));
 
 	return;
 }
 
-void HandleSyscallRemove() {
+void HandleSyscallRemove()
+{
 	int virAddr = kernel->machine->ReadRegister(4);
-	char* fileName = User2System(virAddr,255);
-	if(strlen(fileName) == 0){
+	char *fileName = User2System(virAddr, 255);
+	if (strlen(fileName) == 0)
+	{
 		printf("File name empty.\n");
 		kernel->machine->WriteRegister(2, -1);
 		return;
 	}
-	else if(fileName == NULL){
+	else if (fileName == NULL)
+	{
 		printf("File name is more long.\n");
 		kernel->machine->WriteRegister(2, -1);
 		return;
 	}
-	if(!kernel->fileSystem->Remove(fileName)){
+	if (!kernel->fileSystem->Remove(fileName))
+	{
 		printf("cannot remove file is open\n");
 		kernel->machine->WriteRegister(2, -1);
-	}else {
+	}
+	else
+	{
 		printf("remove success");
 		kernel->machine->WriteRegister(2, 0);
 	}
@@ -356,7 +385,7 @@ void ExceptionHandler(ExceptionType which)
 			/* Process SysAdd Systemcall*/
 			int res;
 			res = SysAdd(/* int op1 */ (int)kernel->machine->ReadRegister(4),
-							/* int op2 */ (int)kernel->machine->ReadRegister(5));
+						 /* int op2 */ (int)kernel->machine->ReadRegister(5));
 
 			DEBUG(dbgSys, "Add returning with " << res << "\n");
 			/* Prepare Result */
