@@ -112,7 +112,7 @@ ifeq ($(hosttype),unknown)
 PROGRAMS = unknownhost
 else
 # change this if you create a new test program!
-PROGRAMS = add createfile halt shell matmult sort segments
+PROGRAMS = add createfile halt shell matmult sort segments bubblesort readprintnum randomnum readprintchar readprintstring test ascii help
 endif
 
 all: $(PROGRAMS)
@@ -132,6 +132,13 @@ add.o: add.c
 add: add.o start.o
 	$(LD) $(LDFLAGS) start.o add.o -o add.coff
 	$(COFF2NOFF) add.coff add
+
+bubblesort.o: bubblesort.c
+	$(CC) $(CFLAGS) -c bubblesort.c
+
+bubblesort: bubblesort.o start.o
+	$(LD) $(LDFLAGS) start.o bubblesort.o -o bubblesort.coff
+	$(COFF2NOFF) bubblesort.coff bubblesort
 
 createfile.o: createfile.c
 	$(CC) $(CFLAGS) -c createfile.c
@@ -163,6 +170,48 @@ matmult.o: matmult.c
 matmult: matmult.o start.o
 	$(LD) $(LDFLAGS) start.o matmult.o -o matmult.coff
 	$(COFF2NOFF) matmult.coff matmult
+
+readprintnum.o: readprintnum.c
+	$(CC) $(CFLAGS) -c readprintnum.c
+readprintnum: readprintnum.o readprintnum.o
+	$(LD) $(LDFLAGS) start.o readprintnum.o -o readprintnum.coff
+	$(COFF2NOFF) readprintnum.coff readprintnum
+
+readprintchar.o: readprintchar.c
+	$(CC) $(CFLAGS) -c readprintchar.c
+readprintchar: readprintchar.o readprintchar.o
+	$(LD) $(LDFLAGS) start.o readprintchar.o -o readprintchar.coff
+	$(COFF2NOFF) readprintchar.coff readprintchar
+
+randomnum.o: randomnum.c
+	$(CC) $(CFLAGS) -c randomnum.c
+randomnum: randomnum.o randomnum.o
+	$(LD) $(LDFLAGS) start.o randomnum.o -o randomnum.coff
+	$(COFF2NOFF) randomnum.coff randomnum
+
+readprintstring.o: readprintstring.c
+	$(CC) $(CFLAGS) -c readprintstring.c
+readprintstring: readprintstring.o readprintstring.o
+	$(LD) $(LDFLAGS) start.o readprintstring.o -o readprintstring.coff
+	$(COFF2NOFF) readprintstring.coff readprintstring
+
+test.o: test.c
+	$(CC) $(CFLAGS) -c test.c
+test: test.o test.o
+	$(LD) $(LDFLAGS) start.o test.o -o test.coff
+	$(COFF2NOFF) test.coff test
+
+ascii.o: ascii.c
+	$(CC) $(CFLAGS) -c ascii.c
+ascii: ascii.o ascii.o
+	$(LD) $(LDFLAGS) start.o ascii.o -o ascii.coff
+	$(COFF2NOFF) ascii.coff ascii
+
+help.o: help.c
+	$(CC) $(CFLAGS) -c help.c
+help: help.o help.o
+	$(LD) $(LDFLAGS) start.o help.o -o help.coff
+	$(COFF2NOFF) help.coff help
 
 clean:
 	$(RM) -f *.o *.ii

@@ -25,6 +25,12 @@
 #include "main.h"
 #include "syscall.h"
 #include "ksyscall.h"
+#define INT_MIN -2147483657
+#define INT_MAX 2147483657
+#define LF ((char)10)
+#define CR ((char)13)
+#define TAB ((char)9)
+#define SPACE ((char)' ')
 //----------------------------------------------------------------------
 // ExceptionHandler
 // 	Entry point into the Nachos kernel.  Called when a user program
@@ -48,11 +54,21 @@
 //	is in machine.h.
 //----------------------------------------------------------------------
 
-/*
-// Input: - User space address (int)
-// - Limit of buffer (int)
-// Output:- Buffer (char*)
-// Purpose: Copy buffer from User memory space to System memory space
+
+//tăng giá trị thành ghi PC
+
+void increasePC()
+{
+	/* set previous programm counter (debugging only)*/
+	kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+
+	/* set programm counter to next instruction (all Instructions are 4 byte wide)*/
+	kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+
+	/* set next programm counter for brach execution */
+	kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
+}
+//copy chuỗi thuộc địa chỉ virtAddr của userspace sang kernelspace
 char *User2System(int virtAddr, int limit)
 {
 	int i; // index
@@ -73,12 +89,7 @@ char *User2System(int virtAddr, int limit)
 	}
 	return kernelBuf;
 }
-
-// Input: - User space address (int)
-// - Limit of buffer (int)
-// - Buffer (char[])
-// Output:- Number of bytes copied (int)
-// Purpose: Copy buffer from System memory space to User memory space
+//Copy chuỗi từ System space sang User space
 int System2User(int virtAddr, int len, char *buffer)
 {
 	if (len < 0)
@@ -95,59 +106,141 @@ int System2User(int virtAddr, int len, char *buffer)
 	} while (i < len && oneChar != 0);
 	return i;
 }
-*/
-
-// Increase program counter
-void IncreaseProgramCounter()
-{
-	/* set previous programm counter (debugging only)*/
-	kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
-
-	/* set programm counter to next instruction (all Instructions are 4 byte wide)*/
-	kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
-
-	/* set next programm counter for brach execution */
-	kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
-
-}
-
-// HANDLE SOME SYSTEMCALL
-
-void HandleSyscallHalt()
-{
-	DEBUG(dbgSys, "\n Shutdown, initiated by user program.");
-	printf("\n\n Shutdown, initiated by user program.");
-	SysHalt();
-	ASSERTNOTREACHED();
-}
-
-void HandleSyscallAdd()
-{
-	DEBUG(dbgSys, "Add " << kernel->machine->ReadRegister(4) << " + " << kernel->machine->ReadRegister(5) << "\n");
-
-	/* Process SysAdd Systemcall*/
-	int result;
-	result = SysAdd(/* int op1 */ (int)kernel->machine->ReadRegister(4),
-					/* int op2 */ (int)kernel->machine->ReadRegister(5));
-
-	DEBUG(dbgSys, "Add returning more with " << result << "\n");
-	/* Prepare Result */
-	kernel->machine->WriteRegister(2, (int)result);
-
-	/* Modify return point */
-	return IncreaseProgramCounter();
-}
 
 void HandleSyscallReadNum(){
 	int result = SysReadNum();
 	kernel->machine->WriteRegister(2, result);
-	return IncreaseProgramCounter();
+	return;
 }
 
 void HandleSyscallPrintNum(){
 	int numberPrint = kernel->machine->ReadRegister(4);
     SysPrintNum(numberPrint);
-	return IncreaseProgramCounter();
+	return;
+}
+
+void HandleSyscallReadChar(){
+	char character;
+	// đọc một kí tự do người dùng nhập vào;
+	//nếu người dùng nhập vào hơn 1 kí tự thì sẽ đọc kí tự đầu tiên
+	character = SysReadChar();
+	kernel->machine->WriteRegister(2, character);
+	return;
+}
+
+void HandleSyscallPrintChar(){
+	char inputCh;
+	//đọc kí tự do người dùng truyền vào
+	inputCh = kernel->machine->ReadRegister(4);
+	//xuất ra màn hình
+	SysPrintChar(inputCh);
+	return;
+}
+void HandleSyscallRandomNum(){
+	int ranNum;
+	//lấy một số ngẫu nhiên 
+	srand((int)time(NULL));
+	ranNum =  rand();
+	//trả kết quả về
+	kernel->machine->WriteRegister(2, ranNum);
+	return;
+}
+
+void HandleSyscallReadString(){
+	int virtAddr;	//địa chỉ vùng nhớ thuộc quyền user sẽ lưu chuỗi nhập vào
+	int len;	//chiều dài cần đọc 
+	virtAddr = kernel->machine->ReadRegister(4);
+	len = kernel->machine->ReadRegister(5);
+	DEBUG(dbgSys,"Do dai chuoi muon doc la: " << len << "\n");
+	DEBUG(dbgSys,"Dia chi vung chua chuoi la: " << virtAddr << "\n");
+	
+	char* buffer;
+	buffer = new char[len+1];
+	//đọc chuỗi do người dùng nhập vào
+	//chuỗi sẻ lưu vào vùng nhớ do hệ điều hành quản lý (kernel space)
+	SysReadString(buffer,len);
+	DEBUG(dbgSys,"Chuoi nhap vao la: " << buffer);
+	//trả chuỗi về vùng nhớ mà người dùng có thể truy cập (user space)
+	System2User(virtAddr,len,buffer);
+	
+	return;
+}
+
+void HandleSyscallPrintString(){
+	int virtAddr = kernel->machine->ReadRegister(4);
+	//chuyển chuỗi xuông vùng kernel space để HĐH xử lý
+	char* inputString ;
+	//chỉ đọc chuỗi tối đa 255 kí tự
+	inputString = User2System(virtAddr,255);
+	DEBUG(dbgSys,"Chuoi xuat ra man hinh la: " << inputString << "\n");
+	//xuất ra màn hình
+	SysPrintString(inputString);
+	return;
+}
+
+void HandleSyscallCreateFile(){
+	int virtAddr = kernel->machine->ReadRegister(4); 
+	// NOTE: Do dai toi da cho file name la 32
+	char* fileName = User2System(virtAddr,255);
+
+	if(strlen(fileName) == 0){
+		printf("File name empty.\n");
+		kernel->machine->WriteRegister(2, -1);
+	}
+	else if(fileName == NULL){
+		printf("File name is more long.\n");
+		kernel->machine->WriteRegister(2, -1);
+	}
+	else{
+		if(!kernel->fileSystem->Create(fileName)){
+			printf("File is not create.\n");
+			kernel->machine->WriteRegister(2, -1);
+		}
+		else{
+			printf("Create file successful.\n");
+			kernel->machine->WriteRegister(2, 0);
+		}
+	}
+
+	delete[] fileName;
+}
+
+void HandleSyscallOpenFile(){
+	DEBUG(dbgSys, "Start open file.\n");
+	int virtAddr = kernel->machine->ReadRegister(4);
+	int type = kernel->machine->ReadRegister(5);
+
+	char* fileName = User2System(virtAddr, 255);
+	DEBUG(dbgSys, "\tFile name: " << fileName << "\n");
+
+	if(type != 0 && type != 1){
+		DEBUG(dbgSys, "\tType is incorrect. Not open file.\n");
+		kernel->machine->WriteRegister(2, -1);
+		delete fileName;
+		return;
+	}
+	int id = kernel->fileSystem->Open(fileName, type);
+	if(id == -1){
+		DEBUG(dbgSys, "\tNot open file, some error: full table, file don't exist,...\n");
+		kernel->machine->WriteRegister(2, -1);
+		delete fileName;
+		return;
+	}
+	DEBUG(dbgSys, "\tOpen file '" << fileName << "' successful\n");
+	
+	kernel->machine->WriteRegister(2, id);
+	delete fileName;
+}
+
+void HandleSyscallCloseFile(){
+	DEBUG(dbgSys, "Start close file.\n");
+	int fileDescriptor = kernel->machine->ReadRegister(4);
+	DEBUG(dbgSys, "\tFile descriptor id: " << fileDescriptor << "\n");
+	int check = kernel->fileSystem->Close(fileDescriptor);
+
+	DEBUG(dbgSys,"\tCheck process: " << check);
+	kernel->machine->WriteRegister(2, check);
+	return;
 }
 // HANDLE SOME SYSTEMCALL
 
@@ -159,49 +252,77 @@ void ExceptionHandler(ExceptionType which)
 
 	DEBUG(dbgSys, "Received Exception " << which << " type: " << type << "\n");
 
-	string desErrors[9] = {"NoException", "SyscallException", "PageFaultException", "ReadOnlyException", "BusErrorException", "AddressErrorException", "OverflowException", "IllegalInstrException", "NumExceptionTypes"};
-
 	switch (which)
 	{
-	case NoException:
-		DEBUG(dbgSys, "Return kernel mode.\n");
-		kernel->interrupt->setStatus(SystemMode);
-		ASSERTNOTREACHED();
-		break;
-	case PageFaultException:
-	case ReadOnlyException:
-	case BusErrorException:
-	case AddressErrorException:
-	case OverflowException:
-	case IllegalInstrException:
-	case NumExceptionTypes:
-		cerr << "Description: " << desErrors[which] << "\n";
-		SysHalt();
-		break;
-
 	case SyscallException:
 		switch (type)
 		{
 		case SC_Halt:
-			HandleSyscallHalt();
+			DEBUG(dbgSys, "Shutdown, initiated by user program.\n");
+
+			SysHalt();
+
+			ASSERTNOTREACHED();
 			break;
 
 		case SC_Add:
-			HandleSyscallAdd();
-			break;
+			DEBUG(dbgSys, "Add " << kernel->machine->ReadRegister(4) << " + " << kernel->machine->ReadRegister(5) << "\n");
 
+			/* Process SysAdd Systemcall*/
+			int res;
+			res = SysAdd(/* int op1 */ (int)kernel->machine->ReadRegister(4),
+							/* int op2 */ (int)kernel->machine->ReadRegister(5));
+
+			DEBUG(dbgSys, "Add returning with " << res << "\n");
+			/* Prepare Result */
+			kernel->machine->WriteRegister(2, (int)res);
+			/* Modify return point */
+
+			increasePC();
+			return;
+			ASSERTNOTREACHED();
 		case SC_ReadNum:
 			HandleSyscallReadNum();
-			break;
-
-		case SC_PrintNum:
-			HandleSyscallPrintNum();
 			break;
 		
 		default:
 			cerr << "Unexpected system call " << type << "\n";
 			break;
 		}
+
+		break;
+	case PageFaultException:
+		printf("PageFaultException\n");
+		SysHalt();
+		break;
+	case ReadOnlyException:
+		printf("ReadOnlyException\n");
+		SysHalt();
+		break;
+	case BusErrorException:
+		printf("BusErrorException\n");
+		SysHalt();
+		break;
+	case AddressErrorException:
+		printf("AddressErrorException\n");
+		SysHalt();
+		break;
+	case OverflowException:
+		printf("OverflowException\n");
+		SysHalt();
+		break;
+	case IllegalInstrException:
+		printf("IllegalInstrException\n");
+		SysHalt();
+		return;
+		break;
+	case NumExceptionTypes:
+		printf("NumExceptionTypes\n");
+		SysHalt();
+		return;
+		break;
+	case NoException:
+		return;
 		break;
 	default:
 		cerr << "Unexpected user mode exception" << (int)which << "\n";

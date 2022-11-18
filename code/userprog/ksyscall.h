@@ -2,18 +2,19 @@
  *
  * userprog/ksyscall.h
  *
- * Kernel interface for systemcalls
+ * Kernel interface for systemcalls 
  *
  * by Marcus Voelp  (c) Universitaet Karlsruhe
  *
  **************************************************************/
 
-#ifndef __USERPROG_KSYSCALL_H__
-#define __USERPROG_KSYSCALL_H__
+#ifndef __USERPROG_KSYSCALL_H__ 
+#define __USERPROG_KSYSCALL_H__ 
+#define __STDC_LIMIT_MACROS
 
 #include "kernel.h"
 #include "synchconsole.h"
-#include <stdlib.h>
+#include <stdint.h>
 
 #define LF ((char)10)
 #define CR ((char)13)
@@ -23,19 +24,13 @@
 #define MAX_LENGTH 11
 bool isBlank(char c) { return c == LF || c == CR || c == TAB || c == SPACE; }
 // Kiểm tra nếu
-bool CheckInput(char c)
-{
-  if ((c >= (char)'0') && (c <= (char)'9'))
-  {
-    return true;
-  }
-  return false;
-}
+
 
 void SysHalt()
 {
   kernel->interrupt->Halt();
 }
+
 
 int SysAdd(int op1, int op2)
 {
@@ -45,31 +40,32 @@ int SysAdd(int op1, int op2)
 int SysReadNum()
 {
   // Bước 1: Đọc các kí tự vào trong bàn phím
-  char numberInput[MAX_LENGTH];
+  char numberInput[MAX_LENGTH + 2];
 
   int n = 0;
-  // int num = 0;
-  bool isNegative = false;
   char c = kernel->synchConsoleIn->GetChar();
 
-  // Khi nhận kí tự enter thì kết thúc việc nhập
+  // Khi nhận kí tự enter thì kết thúc việc nhập, 
+  // tuy nhiên nếu người dùng vẫn cố nhập thì sẽ ghi lại vào vị trí 0 của mảng,
+  // đợi khi người dùng kết thúc nhập thì kiểm tra n với MAX_LENGTH thì sẽ trả lại 0.
   while (c != (char)10)
   {
-    if(c == (char)'-' && n == 0){
-      isNegative = true;
-    }
-    else{
-      numberInput[n++] = c;
-    }
+    numberInput[n++] = c;
     if (n > MAX_LENGTH)
     {
-      DEBUG(dbgSys, "Number is too long");
-      break;
+      DEBUG(dbgSys, "Number is too long.\n");
+      numberInput[0] = c;
     }
     c = kernel->synchConsoleIn->GetChar();
   }
 
+  if(n > MAX_LENGTH){
+    DEBUG(dbgSys, "Value return is zero\n");
+    return 0;
+  }
+
   // Bước 2:Xử lý các trường hợp sẽ gặp phải
+
   // Trường hợp độ dài chuỗi là rỗng.
   int length = n;
   if (length == 0)
@@ -84,8 +80,11 @@ int SysReadNum()
   for (int i = 0; i < length; i++)
   {
     c = numberInput[i];
-    
-    if (!(c >= (char)'0') && (c <= (char)'9'))
+    if (i == 0 && c == (char)'-')
+    {
+      isInteger = true;
+    }
+    else if (!CheckInput(c))
     {
       isInteger = false;
       break;
@@ -97,69 +96,20 @@ int SysReadNum()
     return 0;
   }
 
-  // Trường hợp check ngoài giới hạn int sẽ gán sau
-  // Trường hợp nhập vào là 0000006
-  DEBUG(dbgSys, "Length: " << length << "\n");
-  if (length == 10){
-    char valueCheck[11];
-    strncpy(valueCheck, numberInput, 10);
-    valueCheck[10] = '\0';
-    DEBUG(dbgSys, "Value need check: " << valueCheck << "\n");
-    if(isNegative)
-    {
-      // bool isSmallerMin = false;
-      
-      DEBUG(dbgSys, "Compare with -2147483648: " << strcmp(numberInput, "-2147483648") << "\n");
-    }
-    else
-    {  
-      // bool isLargerMax = false;
-      DEBUG(dbgSys, "Compare with 2147483647: "<< strcmp("2147483647", "2147483647") << "\n");
-      DEBUG(dbgSys, "Compare with 2147483647: "<< strcmp(numberInput, "2147483647") << "\n");
-    }
+  // Trường hợp nó vượt quá ngưỡng của phạm vi integer
+  //-2147483648 to 2147483647
+  // Đang gặp lỗi nhập trùng vào 2 khoảng thì đúng hàm strcmp = 0 nhưng lại trả là 1
+  if (numberInput[0] == (char)'-')
+  {
+    DEBUG(dbgSys, "Compare with -2147483648: " << strcmp(numberInput, "-2147483648") << "\n");
+  }
+  else
+  {
+    DEBUG(dbgSys, "Compare with 2147483647: "<< strcmp("2147483647", "2147483647") << "\n");
+    DEBUG(dbgSys, "Compare with 2147483647: "<< strcmp(numberInput, "2147483647") << "\n");
   }
 
-  int num = 0;
-  for(int i = 0; i < length; i++){
-
-    num = num * 10 + (numberInput[i] - '0');
-    DEBUG(dbgSys, "Result: " << num << "\n");
-
-  }
-
-  DEBUG(dbgSys, "Result: " << num << "\n");
-
-  return num;
-}
-
-void SysPrintNum(int number) {
-    // Check có bằng 0
-    if(number == 0){
-      DEBUG(dbgSys, "Number is zero.\n");
-      kernel->synchConsoleOut->PutChar('0');
-      return;
-    }
-
-    // if (num == INT32_MIN) {
-    //     kernel->synchConsoleOut->PutChar('-');
-    //     for (int i = 0; i < 10; ++i)
-    //         kernel->synchConsoleOut->PutChar("2147483648"[i]);
-    //     return;
-    // }
-
-    if (number < 0) {
-        kernel->synchConsoleOut->PutChar('-');
-        number = -number;
-    }
-    int n = 0;
-    char numberPrint[MAX_LENGTH];
-    while (number) {
-        numberPrint[n++] = number % 10;
-        number /= 10;
-    }
-    for (int i = n - 1; i >= 0; --i){
-        kernel->synchConsoleOut->PutChar(numberPrint[i] + '0');
-    }
+  return 0;
 }
 
 #endif /* ! __USERPROG_KSYSCALL_H__ */

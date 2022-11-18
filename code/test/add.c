@@ -13,9 +13,14 @@ main()
   int result = 456;
   
   // result = Add(42, 23);
+<<<<<<< HEAD
   // result = ReadNum();
   PrintNum(result);
 
+=======
+  result = ReadChar();
+  PrintChar(result);
+>>>>>>> origin/main
   // Always use halt() because don't create sysExit
   Halt();
 }
