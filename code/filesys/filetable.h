@@ -3,26 +3,20 @@
 #include "sysdep.h"
 
 #define TABLE_LENGTH 20
-#define CONSOLE_INPUT 0
-#define CONSOLE_OUTPUT 1
 #define READWRITE 0
 #define READ 1
-#define WRITE 2
+#define CONSOLE_INPUT 2
+#define CONSOLE_OUTPUT 3
 
 class FileTable{
     private:
         OpenFile** openFiles;
-        int* filesType;
-        int *filesDescriptor;
 
     public:
         FileTable(){
             openFiles = new OpenFile*[TABLE_LENGTH];
-            filesType = new int[TABLE_LENGTH];
-            filesType[CONSOLE_INPUT] = READ;
-            filesType[CONSOLE_OUTPUT] = WRITE;
-
-            filesDescriptor = new int[TABLE_LENGTH];
+            openFiles[0]->type = CONSOLE_INPUT;
+            openFiles[1]->type = CONSOLE_OUTPUT;
         }
 
         ~FileTable(){
@@ -33,12 +27,10 @@ class FileTable{
             }
 
             delete[] openFiles;
-            delete[] filesType;
-            delete[] filesDescriptor;
         }
 
         // Them file can mo vao bang
-        int Insert(char* fileName, int type){
+        int AddOpenFile(char* fileName, int type){
             int index = -1;
 
             for(int i = 2; i < TABLE_LENGTH; i++){
@@ -54,36 +46,59 @@ class FileTable{
             }
 
             if(type == READWRITE){
-                filesDescriptor[index] = OpenForReadWrite(fileName, false);
+                openFiles[index]->descriptorId = OpenForReadWrite(fileName, false);
             }
             if(type == READ){
-                filesDescriptor[index] = OpenForRead(fileName, false);
+                openFiles[index]->descriptorId = OpenForRead(fileName, false);
             }
-
-            // printf("File descriptor: %d, index: %d", filesDescriptor[index], index);
 
             //Khong the mo file
-            if (filesDescriptor[index] == -1) {
+            if (openFiles[index]->descriptorId == -1) {
                 return -1;
             }
-            openFiles[index] = new OpenFile(filesDescriptor[index]);
+            openFiles[index] = new OpenFile(openFiles[index]->descriptorId);
             filesType[index] = type;
 
             return index;
         }
 
         // Xoa file khoi bang cac file dang mo <-> Close
-        int Remove(int index){
+        int RemoveOpenFile(int id){
             
-            if(index < 2 || index >= TABLE_LENGTH) {
+            if(id < 2 || id >= TABLE_LENGTH) {
                 return -1;
             }
-            if(openFiles[index] != NULL){
-                Close(filesDescriptor[index]);
-                openFiles[index] = NULL;
+            if(openFiles[id] != NULL){
+                Close(openFiles[id]->descriptorId);
+                openFiles[id] = NULL;
                 return 0;
             }
 
             return -1;
+        }
+
+        int ReadFile(char* buffer, int charCount, int id){
+            if(id >= TABLE_LENGTH || id < 0){
+                return -1;
+            }
+            if(openFiles[id] == NULL){
+                return -1;
+            }
+            int res = openFiles[id]->Read(buffer, charCount);
+            if(res != charCount){
+                return -2;
+            }
+            return res;
+        }
+
+        int WriteFile(char* buffer, int charCount, int id){
+            if(id >= TABLE_LENGTH || id < 0){
+                return -1;
+            }
+            if(openFiles[id] == NULL || filesType[id] == READ){
+                return -1;
+            }
+
+            return openFiles[id]->Write(buffer, charCount);
         }
 };
