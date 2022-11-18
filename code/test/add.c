@@ -13,8 +13,8 @@ main()
   int result;
   
   // result = Add(42, 23);
-  result = ReadNum();
-  PrintNum(result);
+  result = ReadChar();
+  PrintChar(result);
   // Always use halt() because don't create sysExit
   Halt();
 }
