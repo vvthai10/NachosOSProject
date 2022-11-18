@@ -253,7 +253,7 @@ void StringSys2User(char* str, int addr, int convert_length = -1) {
 }
 
 void HandleSyscallReadFile(){
-	int virtAddr = kernel->machine->ReadRegister(4);
+	int virtAddr = kernel->machine->ReadRegister(4); // address of input
 	int charCount = kernel->machine->ReadRegister(5);
 	int id = kernel->machine->ReadRegister(6);
 
