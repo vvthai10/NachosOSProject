@@ -68,17 +68,17 @@ class FileTable{
             }
             openFiles[index] = new OpenFile(filesDescriptor[index]);
             filesType[index] = type;
-//return index??
+
             return index;
         }
 
-        // Xoa file khoi bang cac file dang mo
+        // Xoa file khoi bang cac file dang mo <-> Close
         int Remove(int index){
+            
             if(index < 2 || index >= TABLE_LENGTH) {
                 return -1;
             }
             if(openFiles[index] != NULL){
-                Close(fileDescriptor);
                 Close(filesDescriptor[index]);
                 openFiles[index] = NULL;
                 return 0;

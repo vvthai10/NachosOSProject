@@ -221,7 +221,7 @@ void HandleSyscallOpenFile(){
 	}
 	int id = kernel->fileSystem->Open(fileName, type);
 	if(id == -1){
-		DEBUG(dbgSys, "\tNot open file, some error: full table, name don't exist,...\n");
+		DEBUG(dbgSys, "\tNot open file, some error: full table, file don't exist,...\n");
 		kernel->machine->WriteRegister(2, -1);
 		delete fileName;
 		return;
