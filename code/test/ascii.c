@@ -1,7 +1,6 @@
 #include "syscall.h"
 
-int
-main()
+int main()
 {
   int i;
   for (i = 33; i < 127; i++) {
