@@ -146,12 +146,12 @@ void HandleSyscallRandomNum(){
 }
 
 void HandleSyscallReadString(){
-	int virAdd;	//địa chỉ vùng nhớ thuộc quyền user sẽ lưu chuỗi nhập vào
+	int virtAddr;	//địa chỉ vùng nhớ thuộc quyền user sẽ lưu chuỗi nhập vào
 	int len;	//chiều dài cần đọc 
-	virAdd = kernel->machine->ReadRegister(4);
+	virtAddr = kernel->machine->ReadRegister(4);
 	len = kernel->machine->ReadRegister(5);
 	DEBUG(dbgSys,"Do dai chuoi muon doc la: " << len << "\n");
-	DEBUG(dbgSys,"Dia chi vung chua chuoi la: " << virAdd << "\n");
+	DEBUG(dbgSys,"Dia chi vung chua chuoi la: " << virtAddr << "\n");
 	
 	char* buffer;
 	buffer = new char[len+1];
@@ -160,20 +160,85 @@ void HandleSyscallReadString(){
 	SysReadString(buffer,len);
 	DEBUG(dbgSys,"Chuoi nhap vao la: " << buffer);
 	//trả chuỗi về vùng nhớ mà người dùng có thể truy cập (user space)
-	System2User(virAdd,len,buffer);
+	System2User(virtAddr,len,buffer);
 	
 	return;
 }
 
 void HandleSyscallPrintString(){
-	int virAdd = kernel->machine->ReadRegister(4);
+	int virtAddr = kernel->machine->ReadRegister(4);
 	//chuyển chuỗi xuông vùng kernel space để HĐH xử lý
 	char* inputString ;
 	//chỉ đọc chuỗi tối đa 255 kí tự
-	inputString = User2System(virAdd,255);
+	inputString = User2System(virtAddr,255);
 	DEBUG(dbgSys,"Chuoi xuat ra man hinh la: " << inputString << "\n");
 	//xuất ra màn hình
 	SysPrintString(inputString);
+	return;
+}
+
+void HandleSyscallCreateFile(){
+	int virtAddr = kernel->machine->ReadRegister(4); 
+	// NOTE: Do dai toi da cho file name la 32
+	char* fileName = User2System(virtAddr,255);
+
+	if(strlen(fileName) == 0){
+		printf("File name empty.\n");
+		kernel->machine->WriteRegister(2, -1);
+	}
+	else if(fileName == NULL){
+		printf("File name is more long.\n");
+		kernel->machine->WriteRegister(2, -1);
+	}
+	else{
+		if(!kernel->fileSystem->Create(fileName)){
+			printf("File is not create.\n");
+			kernel->machine->WriteRegister(2, -1);
+		}
+		else{
+			printf("Create file successful.\n");
+			kernel->machine->WriteRegister(2, 0);
+		}
+	}
+
+	delete[] fileName;
+}
+
+void HandleSyscallOpenFile(){
+	DEBUG(dbgSys, "Start open file.\n");
+	int virtAddr = kernel->machine->ReadRegister(4);
+	int type = kernel->machine->ReadRegister(5);
+
+	char* fileName = User2System(virtAddr, 255);
+	DEBUG(dbgSys, "\tFile name: " << fileName << "\n");
+
+	if(type != 0 && type != 1){
+		DEBUG(dbgSys, "\tType is incorrect. Not open file.\n");
+		kernel->machine->WriteRegister(2, -1);
+		delete fileName;
+		return;
+	}
+	int id = kernel->fileSystem->Open(fileName, type);
+	if(id == -1){
+		DEBUG(dbgSys, "\tNot open file, some error: full table, name don't exist,...\n");
+		kernel->machine->WriteRegister(2, -1);
+		delete fileName;
+		return;
+	}
+	DEBUG(dbgSys, "\tOpen file '" << fileName << "' successful\n");
+	
+	kernel->machine->WriteRegister(2, id);
+	delete fileName;
+}
+
+void HandleSyscallCloseFile(){
+	DEBUG(dbgSys, "Start close file.\n");
+	int fileDescriptor = kernel->machine->ReadRegister(4);
+	DEBUG(dbgSys, "\tFile descriptor id: " << fileDescriptor << "\n");
+	int check = kernel->fileSystem->Close(fileDescriptor);
+
+	DEBUG(dbgSys,"\tCheck process: " << check);
+	kernel->machine->WriteRegister(2, check);
 	return;
 }
 
@@ -211,46 +276,47 @@ void ExceptionHandler(ExceptionType which)
 
 			increasePC();
 			return;
-
 			ASSERTNOTREACHED();
-
-			break;
 		case SC_ReadNum:
 			HandleSyscallReadNum();
 			increasePC();
 			return;
-			break;
 		case SC_PrintNum:
 			HandleSyscallPrintNum();
 			increasePC();
 			return;
-			break;
 		case SC_ReadChar:
 			HandleSyscallReadChar();
 			increasePC();
 			return;
-			break;
 		case SC_PrintChar:
 			HandleSyscallPrintChar();
 			increasePC();
 			return;
-			break;
 		case SC_RandomNum:
 			HandleSyscallRandomNum();
 			increasePC();
 			return;
-			break;
 		case SC_ReadString:
 			HandleSyscallReadString();
 			increasePC();
 			return;
-
-			break;
 		case SC_PrintString:
 			HandleSyscallPrintString();
 			increasePC();
 			return;
-			break;
+		case SC_CreateFile:
+			HandleSyscallCreateFile();
+			increasePC();
+			return;
+		case SC_Open:
+			HandleSyscallOpenFile();
+			increasePC();
+			return;
+		case SC_Close:
+			HandleSyscallCloseFile();
+			increasePC();
+			return;
 		default:
 			cerr << "Unexpected system call " << type << "\n";
 			break;
