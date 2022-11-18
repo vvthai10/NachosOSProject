@@ -1,7 +1,8 @@
 #include"syscall.h"
 
 int main() {
-    int id ;
+    int id;
+    PrintString("Hello\n");
     id = Open("test.txt",0);
     if( id != -1){
             PrintString("File ");

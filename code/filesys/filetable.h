@@ -73,7 +73,7 @@ class FileTable{
                 return -1;
             }
             openFiles[index] = new OpenFile(openFiles[index]->descriptorId);
-            filesType[index] = type;
+            openFiles[index]->type = type;
             fileNames[index] = new char[strlen(fileName)];
             fileNames[index] = fileName;
             return index;
@@ -88,9 +88,9 @@ class FileTable{
             if(openFiles[id] != NULL){
                 Close(openFiles[id]->descriptorId);
                 openFiles[id] = NULL;
-                openFiles[index] = NULL;
+                openFiles[id] = NULL;
                 //delete fileNames[index];
-                fileNames[index] = "D";
+                fileNames[id] = "D";
                 return 0;
             }
 
