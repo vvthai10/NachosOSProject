@@ -44,13 +44,15 @@
 class FileSystem
 {
 public:
-	FileTable* fileTable;
+	FileTable *fileTable;
 
-	FileSystem() {
+	FileSystem()
+	{
 		fileTable = new FileTable;
 	}
 
-	~FileSystem() {
+	~FileSystem()
+	{
 		delete fileTable;
 	}
 
@@ -78,14 +80,17 @@ public:
 		return fileTable->Insert(name, type);
 	}
 
-	int Close(int id){
+	int Close(int id)
+	{
 		return fileTable->Remove(id);
 	}
 
 	int Seek(int position, int fileId) { return fileTable->Seek(position, fileId); }
 
 	bool Remove(char *name) { return Unlink(name) == 0; }
-	int IsFileOpen(char* fileName) {
+
+	int IsFileOpen(char *fileName)
+	{
 		return fileTable->IsFileOpen(fileName);
 	}
 };

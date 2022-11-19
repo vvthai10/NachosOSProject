@@ -56,7 +56,6 @@
 
 
 //tăng giá trị thành ghi PC
-
 void increasePC()
 {
 	/* set previous programm counter (debugging only)*/
@@ -221,7 +220,7 @@ void HandleSyscallOpenFile(){
 	}
 	int id = kernel->fileSystem->Open(fileName, type);
 	if(id == -1){
-		DEBUG(dbgSys, "\tNot open file, some error: full table, file don't exist,...\n");
+		DEBUG(dbgSys, "\tNot open file, some error: full table, name don't exist,...\n");
 		kernel->machine->WriteRegister(2, -1);
 		delete fileName;
 		return;
@@ -242,12 +241,13 @@ void HandleSyscallCloseFile(){
 	kernel->machine->WriteRegister(2, check);
 	return;
 }
+
 void HandleSyscallSeek() {
 	int pos = kernel->machine->ReadRegister(4);
 	int fileId =kernel->machine->ReadRegister(5);
 
 	kernel->machine->WriteRegister(2, SysSeek(pos,fileId));
-	
+
 	return;
 }
 void HandleSyscallRemove() {
@@ -266,19 +266,21 @@ void HandleSyscallRemove() {
 	if(kernel->fileSystem->IsFileOpen(fileName) != -1) {
 		printf("file is open \n");
 		delete[] fileName;
+		kernel->machine->WriteRegister(2, -1);
 		return;
 	}
-	
 	if(!kernel->fileSystem->Remove(fileName)){
 		printf("file doesn't exist\n");
 		kernel->machine->WriteRegister(2, -1);
 	}else {
 		printf("remove success");
+		// printf("remove success");
 		kernel->machine->WriteRegister(2, 0);
 	}
 	delete[] fileName;
 	return;
 }
+
 void ExceptionHandler(ExceptionType which)
 {
 	int type = kernel->machine->ReadRegister(2);

@@ -14,22 +14,18 @@ class FileTable{
         OpenFile** openFiles;
         int* filesType;
         int *filesDescriptor;
+
         char** fileNames;
+
     public:
         FileTable(){
             openFiles = new OpenFile*[TABLE_LENGTH];
+            fileNames = new char*[TABLE_LENGTH];
             filesType = new int[TABLE_LENGTH];
             filesType[CONSOLE_INPUT] = READ;
             filesType[CONSOLE_OUTPUT] = WRITE;
 
             filesDescriptor = new int[TABLE_LENGTH];
-            fileNames = new char*[TABLE_LENGTH];
-            for (int i = 0; i < TABLE_LENGTH; i++)
-            {
-                /* code */
-                fileNames[i] = NULL;
-            }
-            
         }
 
         ~FileTable(){
@@ -37,18 +33,15 @@ class FileTable{
                 if(openFiles[i] != NULL){
                     delete[] openFiles[i];
                 }
-            }
-
-            delete[] openFiles;
-            delete[] filesType;
-            delete[] filesDescriptor;
-            for (int i = 2; i < TABLE_LENGTH; i++)
-            {
-                if(fileNames[i] != NULL) {
+                if(fileNames[i] != NULL){
                     delete[] fileNames[i];
                 }
             }
+
+            delete[] openFiles;
             delete[] fileNames;
+            delete[] filesType;
+            delete[] filesDescriptor;
         }
 
         // Them file can mo vao bang
@@ -82,28 +75,29 @@ class FileTable{
             }
             openFiles[index] = new OpenFile(filesDescriptor[index]);
             filesType[index] = type;
+
             fileNames[index] = new char[strlen(fileName)];
-            fileNames[index] = fileName;
+            fileNames[index] = "D";
+
             return index;
         }
 
-        // Xoa file khoi bang cac file dang mo <-> Close
+        // Xoa file khoi bang cac file dang mo
         int Remove(int index){
-            
             if(index < 2 || index >= TABLE_LENGTH) {
                 return -1;
             }
             if(openFiles[index] != NULL){
                 Close(filesDescriptor[index]);
                 openFiles[index] = NULL;
-                //delete fileNames[index];
                 fileNames[index] = "D";
                 return 0;
             }
 
             return -1;
         }
-        //index of openfile in table
+
+
         int Seek(int pos, int index) {
             if (index <= 1 || index >= TABLE_LENGTH) return -1;
             if (openFiles[index] == NULL) return -1;
@@ -121,6 +115,6 @@ class FileTable{
                 }
             }
             return -1;
-            
+
         }
 };
