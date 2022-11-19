@@ -176,7 +176,7 @@ void HandleSyscallPrintString()
 	int virtAddr = kernel->machine->ReadRegister(4);
 	// chuyển chuỗi xuông vùng kernel space để HĐH xử lý
 	char *inputString;
-	// chỉ đọc chuỗi tối đa 255 kí tự
+	// chỉ đọc chuỗi tối đa 255 kí tự?????
 	inputString = User2System(virtAddr, 255);
 	DEBUG(dbgSys, "Chuoi xuat ra man hinh la: " << inputString << "\n");
 	// xuất ra màn hình
@@ -288,7 +288,7 @@ void HandleSyscallReadFile()
 		return;
 	}
 	// check if file exist
-	if (FileSystem->openf[id] == NULL)
+	if (kernel->fileSystem-> openFiles[id] == NULL)
 	{
 		printf("File not exist");
 		// signal fail attempt
