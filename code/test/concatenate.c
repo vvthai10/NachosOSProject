@@ -23,7 +23,7 @@ int main() {
     readSize = Seek(-1,idSource2);
     Seek(0,idSource2);
     Read(readBuffer, 255, idSource2);
-    //move con trỏ file tới cuối file
+    //move con trỏ file tới cuối file nguồn 1
     Seek(-1,idSource1);
     //viết dữ liệu vào file nguồn 1
     Write(readBuffer,readSize,idSource1);
