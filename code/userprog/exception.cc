@@ -276,15 +276,68 @@ void HandleSyscallReadFile()
 	int charCount = kernel->machine->ReadRegister(5); // ??
 	int id = kernel->machine->ReadRegister(6);		  // ?
 
-	char *buffer = User2System(virtAddr, 255);
-
 	DEBUG(dbgFile, "Read files " << id << "\n");
 
 	int check;
-	// Doc tu stdin
+	// check if file is in FAT
+	if (id < 0 || id > 3)
+	{
+		printf("Cannot found file in FAT");
+		// signal fail attempt
+		kernel->machine->WriteRegister(2, -1);
+		return;
+	}
+	// check if file exist
+	if (FileSystem->openf[id] == NULL)
+	{
+		printf("File not exist");
+		// signal fail attempt
+		kernel->machine->WriteRegister(2, -1);
+		return;
+	}
+	// check if is printing
+	if (id == 3)
+	{
+		printf("Cannot read file while writing");
+		// signal fail attempt
+		kernel->machine->WriteRegister(2, -1);
+		return;
+	}
+	// get starting position??
+	int prePos = fileSystem->openf[id]->GetCurrentPos();
+	int curPos;	
+	// move address from user space to kernel space
+	char *buffer = User2System(virtAddr, charCount);
+	// Doc tu stdin (keyboard input)
 	if (id == 0)
 	{
 		check = kernel->synchConsoleIn->GetString(buffer, charCount);
+
+
+		// get actual size read
+		int size = kernel->synchConsoleIn->Read(buffer, charCount);
+		// move data from kernel to user space
+		System2User(virtAddr, size, buffer);
+		// write data size to register
+		machine->WriteRegister(2, size);  
+		delete buffer;
+		return;
+	}
+
+	// Xet truong hop doc file binh thuong thi tra ve so byte thuc su
+	if ((fileSystem->openf[id]->Read(buf, charcount)) > 0)
+	{
+		// So byte thuc su = NewPos - OldPos
+		NewPos = fileSystem->openf[id]->GetCurrentPos();
+		// Copy chuoi tu vung nho System Space sang User Space voi bo dem buffer co do dai la so byte thuc su
+		System2User(virtAddr, NewPos - OldPos, buf);
+		machine->WriteRegister(2, NewPos - OldPos);
+	}
+	else
+	{
+		// Truong hop con lai la doc file co noi dung la NULL tra ve -2
+		// printf("\nDoc file rong.");
+		machine->WriteRegister(2, -2);
 	}
 
 	check = kernel->fileSystem->Read(buffer, charCount, id);
