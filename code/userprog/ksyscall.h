@@ -229,5 +229,4 @@ int SysSeek(int seekPos, int fileId) {
     }
     return kernel->fileSystem->Seek(seekPos, fileId);
 }
-
 #endif /* ! __USERPROG_KSYSCALL_H__ */
