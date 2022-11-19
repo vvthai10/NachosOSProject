@@ -265,7 +265,7 @@ void HandleSyscallRemove() {
 		return;
 	}
 
-	if(kernel->fileSystem->IsFileOpen(fileName) != -1) {
+	if(kernel->fileSystem->IsFileOpen(fileName) == 1) {
 		printf("File is open \n");
 		kernel->machine->WriteRegister(2, -1);
 		delete[] fileName;
