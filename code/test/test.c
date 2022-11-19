@@ -22,6 +22,6 @@ int main() {
             PrintString("Open file failed\n");
         }
     }
-
+    Remove("index.txt");
     Halt();
 }

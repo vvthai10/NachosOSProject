@@ -82,6 +82,12 @@ public:
 		return fileTable->Remove(id);
 	}
 
+	bool IsFileOpen(char* nameCheck){
+		return fileTable->CheckFileOpen(nameCheck);
+	}
+
+	int Seek(int position, int fileId) { return fileTable->Seek(position, fileId); }
+
 	bool Remove(char *name) { return Unlink(name) == 0; }
 };
 
@@ -117,3 +123,4 @@ private:
 #endif // FILESYS
 
 #endif // FS_H
+

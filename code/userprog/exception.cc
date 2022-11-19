@@ -242,6 +242,45 @@ void HandleSyscallCloseFile(){
 	return;
 }
 
+void HandleSyscallSeek() {
+	int pos = kernel->machine->ReadRegister(4);
+	int fileId =kernel->machine->ReadRegister(5);
+
+	kernel->machine->WriteRegister(2, SysSeek(pos,fileId));
+	
+	return;
+}
+
+void HandleSyscallRemove() {
+	int virAddr = kernel->machine->ReadRegister(4);
+	char* fileName = User2System(virAddr,255);
+	if(strlen(fileName) == 0){
+		printf("File name empty.\n");
+		kernel->machine->WriteRegister(2, -1);
+		return;
+	}
+	else if(fileName == NULL){
+		printf("File name is more long.\n");
+		kernel->machine->WriteRegister(2, -1);
+		return;
+	}
+
+	if(kernel->fileSystem->IsFileOpen(fileName) != -1) {
+		printf("File is open \n");
+		delete[] fileName;
+		return;
+	}
+	if(!kernel->fileSystem->Remove(fileName)){
+		printf("file doesn't exist\n");
+		kernel->machine->WriteRegister(2, -1);
+	}else {
+		printf("remove success");
+		kernel->machine->WriteRegister(2, 0);
+	}
+	delete[] fileName;
+	return;
+}
+
 void ExceptionHandler(ExceptionType which)
 {
 	int type = kernel->machine->ReadRegister(2);
@@ -315,6 +354,14 @@ void ExceptionHandler(ExceptionType which)
 			return;
 		case SC_Close:
 			HandleSyscallCloseFile();
+			increasePC();
+			return;
+		case SC_Seek:
+			HandleSyscallSeek();
+			increasePC();
+			return;
+		case SC_Remove:
+			HandleSyscallRemove();
 			increasePC();
 			return;
 		default:

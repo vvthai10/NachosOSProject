@@ -222,5 +222,11 @@ void SysPrintString(char* string){
   //in kí tự '\0' 
   SysPrintChar(string[len]);
 }
-
+int SysSeek(int seekPos, int fileId) {
+    if (fileId <= 1) {
+        DEBUG(dbgSys, "\nCan't seek in console");
+        return -1;
+    }
+    return kernel->fileSystem->Seek(seekPos, fileId);
+}
 #endif /* ! __USERPROG_KSYSCALL_H__ */
