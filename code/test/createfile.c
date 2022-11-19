@@ -10,10 +10,12 @@
 int
 main()
 {
-  int result;
+  //nhập tên file
+  char fileName[255];
+  PrintString("input file name (max length is 255): ");
+  ReadString(fileName,255);
+  //tạo file
+  CreateFile(fileName);
+  Halt();
   
-  result = Add(5, 6);
-
-  // Halt();
-  /* not reached */
 }
