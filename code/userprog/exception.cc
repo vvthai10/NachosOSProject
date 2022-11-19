@@ -267,6 +267,7 @@ void HandleSyscallRemove() {
 
 	if(kernel->fileSystem->IsFileOpen(fileName) != -1) {
 		printf("File is open \n");
+		kernel->machine->WriteRegister(2, -1);
 		delete[] fileName;
 		return;
 	}
@@ -279,6 +280,52 @@ void HandleSyscallRemove() {
 	}
 	delete[] fileName;
 	return;
+}
+
+void HandleSyscallReadFile() {
+	int virtAddr = kernel->machine->ReadRegister(4);
+	int size = kernel->machine->ReadRegister(5);
+	int id = kernel->machine->ReadRegister(6);
+
+	char* buffer = User2System(virtAddr, size);
+
+	DEBUG(dbgSys, "Read file has id: " << id << "\n");
+	int check;
+
+	// Doc tu stdin
+	if(id == 0){
+		check = kernel->synchConsoleIn->GetString(buffer, size);
+	}
+
+	// Doc tu file
+	check = kernel->fileSystem->Read(buffer, size, id);
+
+	kernel->machine->WriteRegister(2, check);
+	System2User(virtAddr, size, buffer);
+
+	delete[] buffer;
+}
+
+void HandleSyscallWriteFile() {
+	int virtAddr = kernel->machine->ReadRegister(4);
+	int size = kernel->machine->ReadRegister(5);
+	int id = kernel->machine->ReadRegister(6);
+
+	char* buffer = User2System(virtAddr, 255);
+
+	DEBUG(dbgSys, "Write file have id: " << id << "\n");
+	int check;
+	// Doc tu stdin
+	if(id == 1){
+		check = kernel->synchConsoleOut->PutString(buffer, size);
+	}
+
+	check = kernel->fileSystem->Write(buffer, size, id);
+	DEBUG(dbgSys, "Res return when run write: " << check << "\n");
+	kernel->machine->WriteRegister(2, check);
+	System2User(virtAddr, size, buffer);
+
+	delete[] buffer;
 }
 
 void ExceptionHandler(ExceptionType which)
@@ -354,6 +401,14 @@ void ExceptionHandler(ExceptionType which)
 			return;
 		case SC_Close:
 			HandleSyscallCloseFile();
+			increasePC();
+			return;
+		case SC_Read:
+			HandleSyscallReadFile();
+			increasePC();
+			return;
+		case SC_Write:
+			HandleSyscallWriteFile();
 			increasePC();
 			return;
 		case SC_Seek:

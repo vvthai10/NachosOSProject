@@ -59,6 +59,33 @@ class FileTable {
         return -1;
     }
 
+    int ReadFile(char* buffer, int size, int id){
+        if(id < 2 || id >= TABLE_LENGTH){
+            return -1;
+        }
+        if(openFiles[id] == NULL){
+            return -1;
+        }
+        int sizeRead = openFiles[id]->Read(buffer, size);
+        // So luong ki tu doc duoc co bang kich thuoc quy dinh
+        if(sizeRead != size){
+            return -2;
+        }
+        return sizeRead;
+    }
+
+    int WriteFile(char* buffer, int size, int id){
+        if(id < 2 || id >= TABLE_LENGTH){
+            return -1;
+        }
+        if(openFiles[id] == NULL || openFiles[id]->type != READWRITE){
+            return -1;
+        }
+        int sizeWrite = openFiles[id]->Write(buffer, size);
+        
+        return sizeWrite;
+    }
+
     bool CheckFileOpen(char* nameCheck){
         for(int i = 2; i < TABLE_LENGTH; i++){
             if(openFiles[i]){

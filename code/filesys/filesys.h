@@ -82,6 +82,14 @@ public:
 		return fileTable->Remove(id);
 	}
 
+	int Read(char* buffer, int size, int id){
+		return fileTable->ReadFile(buffer, size, id);
+	}
+
+	int Write(char* buffer, int size, int id){
+		return fileTable->WriteFile(buffer, size, id);
+	}
+
 	bool IsFileOpen(char* nameCheck){
 		return fileTable->CheckFileOpen(nameCheck);
 	}
