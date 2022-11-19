@@ -76,9 +76,8 @@ class FileTable{
             openFiles[index] = new OpenFile(filesDescriptor[index]);
             filesType[index] = type;
 
-            fileNames[index] = new char[strlen(fileName)];
-            fileNames[index] = "D";
-
+            fileNames[index] = new char[strlen(fileName)];            
+            strcpy(fileNames[index],fileName);
             return index;
         }
 
@@ -90,7 +89,9 @@ class FileTable{
             if(openFiles[index] != NULL){
                 Close(filesDescriptor[index]);
                 openFiles[index] = NULL;
-                fileNames[index] = "D";
+                
+                delete fileNames[index];
+                fileNames[index] = NULL;
                 return 0;
             }
 
