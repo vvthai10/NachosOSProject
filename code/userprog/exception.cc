@@ -162,6 +162,7 @@ void HandleSyscallReadString(){
 	//trả chuỗi về vùng nhớ mà người dùng có thể truy cập (user space)
 	System2User(virtAddr,len,buffer);
 	
+	delete[] buffer;
 	return;
 }
 
@@ -294,7 +295,7 @@ void HandleSyscallReadFile() {
 
 	// Doc tu stdin
 	if(id == 0){
-		check = kernel->synchConsoleIn->GetString(buffer, size);
+		check = kernel->synchConsoleIn->GetStr7ing(buffer, size);
 	}
 
 	// Doc tu file
