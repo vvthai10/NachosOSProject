@@ -188,12 +188,12 @@ void HandleSyscallCreateFile(){
 		kernel->machine->WriteRegister(2, -1);
 	}
 	else if(fileName == NULL){
-		printf("File name is more long.\n");
+		printf("File name is too long.\n");
 		kernel->machine->WriteRegister(2, -1);
 	}
 	else{
 		if(!kernel->fileSystem->Create(fileName)){
-			printf("File is not create.\n");
+			printf("File cannot create.\n");
 			kernel->machine->WriteRegister(2, -1);
 		}
 		else{
