@@ -27,15 +27,32 @@ class SynchConsoleInput : public CallBackObj {
 
     char GetChar();		// Read a character, waiting if necessary
     int GetString(char* buffer, int size){
-      for(int i = 0; i < size; i++){
-        buffer[i] = GetChar();
-        if(buffer[i] == (char)10){
-          printf("Ban da nhan enter\n");
-          buffer[i] = 0;
-          return -2;
+      char temp = GetChar();
+      int i = 0;
+      while(temp != (char)10){
+        if(i < size){
+          buffer[i] = temp;
         }
+        i++;
+        temp = GetChar();
       }
-      return size;
+      // int i = 0;
+      // do{
+      //   temp = GetChar();
+      //   if(i < size && temp != (char)10){
+      //     buffer[i] = temp;
+      //   }
+      //   i++;
+      // }while(temp != (char)10);
+
+      // for(int i = 0; i < size; i++){
+      //   buffer[i] = GetChar();
+      //   if(buffer[i] == (char)10){
+      //     buffer[i] = 0;
+      //     return -2;
+      //   }
+      // }
+      return i;
     }	
     
   private:
