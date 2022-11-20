@@ -70,20 +70,13 @@ public:
 		Lseek(file, 0, 2);
 		return Tell(file);
 	}
-<<<<<<< HEAD
-
-=======
 	//đưa con trỏ file tới vị trí position
->>>>>>> 7a675ff2ff57ddf58673c8682cbe69e027cf9f30
 	int Seek(int position) { return currentOffset = position; }
 
 private:
 	int file;
-<<<<<<< HEAD
-=======
 
 	//vị trí của con trỏ file
->>>>>>> 7a675ff2ff57ddf58673c8682cbe69e027cf9f30
 	int currentOffset;
 };
 

@@ -36,27 +36,7 @@ class SynchConsoleInput : public CallBackObj {
         i++;
         temp = GetChar();
       }
-<<<<<<< HEAD
       return size;
-=======
-      // int i = 0;
-      // do{
-      //   temp = GetChar();
-      //   if(i < size && temp != (char)10){
-      //     buffer[i] = temp;
-      //   }
-      //   i++;
-      // }while(temp != (char)10);
-
-      // for(int i = 0; i < size; i++){
-      //   buffer[i] = GetChar();
-      //   if(buffer[i] == (char)10){
-      //     buffer[i] = 0;
-      //     return -2;
-      //   }
-      // }
-      return i;
->>>>>>> 7a675ff2ff57ddf58673c8682cbe69e027cf9f30
     }	
     
   private:

@@ -178,7 +178,6 @@ void HandleSyscallPrintString(){
 }
 
 void HandleSyscallCreateFile(){
-<<<<<<< HEAD
 	int virtAddr = kernel->machine->ReadRegister(4);
 	char* fileName = User2System(virtAddr,255);
 
@@ -188,27 +187,11 @@ void HandleSyscallCreateFile(){
 	}
 	else if(fileName == NULL){
 		printf("Don't create file\n");
-=======
-	int virtAddr = kernel->machine->ReadRegister(4); 
-	// NOTE: Do dai toi da cho file name la 32
-	char* fileName = User2System(virtAddr,255);
-
-	if(strlen(fileName) == 0){
-		printf("File name empty.\n");
-		kernel->machine->WriteRegister(2, -1);
-	}
-	else if(fileName == NULL){
-		printf("File name is more long.\n");
->>>>>>> 7a675ff2ff57ddf58673c8682cbe69e027cf9f30
 		kernel->machine->WriteRegister(2, -1);
 	}
 	else{
 		if(!kernel->fileSystem->Create(fileName)){
-<<<<<<< HEAD
 			printf("Don't create file\n");
-=======
-			printf("File is not create.\n");
->>>>>>> 7a675ff2ff57ddf58673c8682cbe69e027cf9f30
 			kernel->machine->WriteRegister(2, -1);
 		}
 		else{
@@ -231,37 +214,24 @@ void HandleSyscallOpenFile(){
 	if(type != 0 && type != 1){
 		DEBUG(dbgSys, "\tType is incorrect. Not open file.\n");
 		kernel->machine->WriteRegister(2, -1);
-<<<<<<< HEAD
 		delete[] fileName;
-=======
-		delete fileName;
->>>>>>> 7a675ff2ff57ddf58673c8682cbe69e027cf9f30
 		return;
 	}
 	int id = kernel->fileSystem->Open(fileName, type);
 	if(id == -1){
 		DEBUG(dbgSys, "\tNot open file, some error: full table, name don't exist,...\n");
 		kernel->machine->WriteRegister(2, -1);
-<<<<<<< HEAD
 		delete[] fileName;
-=======
-		delete fileName;
->>>>>>> 7a675ff2ff57ddf58673c8682cbe69e027cf9f30
 		return;
 	}
 	DEBUG(dbgSys, "\tOpen file '" << fileName << "' successful\n");
 	
 	kernel->machine->WriteRegister(2, id);
-<<<<<<< HEAD
 	delete[] fileName;
-=======
-	delete fileName;
->>>>>>> 7a675ff2ff57ddf58673c8682cbe69e027cf9f30
 }
 
 void HandleSyscallCloseFile(){
 	DEBUG(dbgSys, "Start close file.\n");
-<<<<<<< HEAD
 	int id = kernel->machine->ReadRegister(4);
 	DEBUG(dbgSys, "\tFile descriptor id: " << id << "\n");
 	int check = kernel->fileSystem->Close(id);
@@ -272,35 +242,20 @@ void HandleSyscallCloseFile(){
 	else{
 		DEBUG(dbgSys, "\tError when close file.\n");
 	}
-=======
-	int fileDescriptor = kernel->machine->ReadRegister(4);
-	DEBUG(dbgSys, "\tFile descriptor id: " << fileDescriptor << "\n");
-	int check = kernel->fileSystem->Close(fileDescriptor);
-
-	DEBUG(dbgSys,"\tCheck process: " << check);
->>>>>>> 7a675ff2ff57ddf58673c8682cbe69e027cf9f30
 	kernel->machine->WriteRegister(2, check);
 	return;
 }
 
 void HandleSyscallSeek() {
-<<<<<<< HEAD
-	int pos = kernel->machine->ReadRegister(4);
-	int fileId =kernel->machine->ReadRegister(5);
-
-=======
 	//lấy ví trí cần dịch và id của file đang mửo
 	int pos = kernel->machine->ReadRegister(4);
 	int fileId =kernel->machine->ReadRegister(5);
 	//trả về giá trị và dịch con trỏ file tới vị trí pos
->>>>>>> 7a675ff2ff57ddf58673c8682cbe69e027cf9f30
 	kernel->machine->WriteRegister(2, SysSeek(pos,fileId));
 	
 	return;
 }
 
-<<<<<<< HEAD
-=======
 void HandleSyscallRemove() {
 	int virAddr = kernel->machine->ReadRegister(4);
 	char* fileName = User2System(virAddr,255);
@@ -339,7 +294,6 @@ void HandleSyscallRemove() {
 	return;
 }
 
->>>>>>> 7a675ff2ff57ddf58673c8682cbe69e027cf9f30
 void HandleSyscallReadFile() {
 	int virtAddr = kernel->machine->ReadRegister(4);
 	int size = kernel->machine->ReadRegister(5);
@@ -354,20 +308,11 @@ void HandleSyscallReadFile() {
 	if(id == 0){
 		check = kernel->synchConsoleIn->GetString(buffer, size);
 	}
-<<<<<<< HEAD
 	// Doc tu file
 	else{
 		check = kernel->fileSystem->Read(buffer, size, id);
 	}
 
-=======
-	else{
-		// Doc tu file
-		check = kernel->fileSystem->Read(buffer, size, id);
-	}
-
-
->>>>>>> 7a675ff2ff57ddf58673c8682cbe69e027cf9f30
 	kernel->machine->WriteRegister(2, check);
 	System2User(virtAddr, size, buffer);
 
@@ -379,7 +324,6 @@ void HandleSyscallWriteFile() {
 	int size = kernel->machine->ReadRegister(5);
 	int id = kernel->machine->ReadRegister(6);
 
-<<<<<<< HEAD
 	char* buffer = User2System(virtAddr, size);
 
 	DEBUG(dbgSys, "Write file have id: " << id << "\n");
@@ -389,16 +333,6 @@ void HandleSyscallWriteFile() {
 		check = kernel->synchConsoleOut->PutString(buffer, size);
 	}
 	// Ghi vao file
-=======
-	char* buffer = User2System(virtAddr, 255);
-
-	DEBUG(dbgSys, "Write file have id: " << id << "\n");
-	int check;
-	// Doc tu stdin
-	if(id == 1){
-		check = kernel->synchConsoleOut->PutString(buffer, size);
-	}
->>>>>>> 7a675ff2ff57ddf58673c8682cbe69e027cf9f30
 	else{
 		check = kernel->fileSystem->Write(buffer, size, id);
 	}
@@ -409,40 +343,6 @@ void HandleSyscallWriteFile() {
 	delete[] buffer;
 }
 
-<<<<<<< HEAD
-void HandleSyscallRemove() {
-	int virAddr = kernel->machine->ReadRegister(4);
-	char* fileName = User2System(virAddr,255);
-	if(strlen(fileName) == 0){
-		printf("File name empty.\n");
-		kernel->machine->WriteRegister(2, -1);
-		return;
-	}
-	else if(fileName == NULL){
-		printf("File name is more long.\n");
-		kernel->machine->WriteRegister(2, -1);
-		return;
-	}
-
-	if(kernel->fileSystem->IsFileOpen(fileName) == 1) {
-		printf("File is open.\n");
-		kernel->machine->WriteRegister(2, -1);
-		delete[] fileName;
-		return;
-	}
-	if(!kernel->fileSystem->Remove(fileName)){
-		printf("File doesn't exist\n");
-		kernel->machine->WriteRegister(2, -1);
-	}else {
-		printf("Remove successful.\n");
-		kernel->machine->WriteRegister(2, 0);
-	}
-	delete[] fileName;
-	return;
-}
-
-=======
->>>>>>> 7a675ff2ff57ddf58673c8682cbe69e027cf9f30
 void ExceptionHandler(ExceptionType which)
 {
 	int type = kernel->machine->ReadRegister(2);
