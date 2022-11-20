@@ -1,4 +1,5 @@
 #include "syscall.h"
+#define MAX_FILE_LENGTH 255
 /*
 copy a.txt b.txt
 sẽ copy dữ liệu từ file a.txt vào b.txt
@@ -6,9 +7,9 @@ nếu b.txt không tồn tại thì sẽ tạo file b.txt
 nếu b.txt có sẵn dữ liệu sẽ nối dữ liệu từ file a.txt vào cuối b.txt
 */
 int main() {
-    char fileName1[255];
-    char fileName2[255];
-    char* readBuffer;
+    char fileName1[MAX_FILE_LENGTH];
+    char fileName2[MAX_FILE_LENGTH];
+    char readBuffer[MAX_FILE_LENGTH];
     int readSize;
 
     int idSource1;
@@ -16,10 +17,10 @@ int main() {
 
     //nhập tên file
     PrintString("input source file name (max length 255): ");
-    ReadString(fileName1,255);
+    ReadString(fileName1,MAX_FILE_LENGTH);
     PrintChar('\n');
     PrintString("input destination file name (max length 255): ");
-    ReadString(fileName2,255);
+    ReadString(fileName2,MAX_FILE_LENGTH);
     //mở file
     idSource1 = Open(fileName1,1);
     idSource2 = Open(fileName2, 0);
