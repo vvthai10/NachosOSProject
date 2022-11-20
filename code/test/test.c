@@ -31,11 +31,18 @@ int main() {
     int i;
     int write;
 
+<<<<<<< HEAD
     int fileid = Open("mono.txt", 1);
     int read = Read(buffer, 10, fileid);
     int len = 0;
     while (buffer[len] != '\0') ++len;
     PrintNum(fileid);
+=======
+    int fileid = Open("index.txt", 1);
+    int read = Read(buffer, 10, fileid);
+    int len = 0;
+    while (buffer[len] != '\0') ++len;
+>>>>>>> 7a675ff2ff57ddf58673c8682cbe69e027cf9f30
     PrintString("Value return: ");
     PrintNum(read);
     PrintString("\nRead ");
@@ -47,6 +54,7 @@ int main() {
     // ------------ TEST READ ---------
 
     // ------------ TEST WRITE ---------
+<<<<<<< HEAD
     // fileid = Open("sontung.txt", 0);
     // write = Write(buffer, len, fileid);
 
@@ -56,10 +64,22 @@ int main() {
     // PrintString(buffer);
     // PrintString("\n");
     // Close(fileid);
+=======
+    fileid = Open("sontung.txt", 0);
+    write = Write(buffer, len, fileid);
+
+    PrintString("Write ");
+    PrintNum(write);
+    PrintString(" characters: ");
+    PrintString(buffer);
+    PrintString("\n");
+    Close(fileid);
+>>>>>>> 7a675ff2ff57ddf58673c8682cbe69e027cf9f30
     // ------------ TEST WRITE ---------
 
 
     // ------------ TEST READ ---------
+<<<<<<< HEAD
     // fileid = Open("index.txt", 0);
     // read = Read(buffer, 50, fileid);
     // len = 0;
@@ -72,10 +92,25 @@ int main() {
     // PrintString(" characters: ");
     // PrintString(buffer);
     // PrintString("\n");
+=======
+    fileid = Open("index.txt", 0);
+    read = Read(buffer, 50, fileid);
+    len = 0;
+    while (buffer[len] != '\0') ++len;
+
+    PrintString("Value return: ");
+    PrintNum(read);
+    PrintString("\nRead ");
+    PrintNum(len);
+    PrintString(" characters: ");
+    PrintString(buffer);
+    PrintString("\n");
+>>>>>>> 7a675ff2ff57ddf58673c8682cbe69e027cf9f30
     // ------------ TEST READ ---------
 
 
     // Write to the same file
+<<<<<<< HEAD
     // write = Write(buffer, len, fileid);
     // PrintString("Write ");
     // PrintNum(write);
@@ -95,6 +130,26 @@ int main() {
     // len = Write(buffer, len, 1);
     // PrintString("\n");
     // PrintNum(len);
+=======
+    write = Write(buffer, len, fileid);
+    PrintString("Write ");
+    PrintNum(write);
+    PrintString(" characters: ");
+    PrintString(buffer);
+    PrintString("\n");
+    Close(fileid);
+
+    for (i = 0; i < len; ++i) {
+        buffer[i] = 0;
+    }
+    Read(buffer, 50, 0);
+    len = 0;
+    while (buffer[len] != '\0') ++len;
+    PrintString("\nSize len: ");
+    PrintNum(len);
+    Write(buffer, len, 1);
+   //  PrintNum(Write(buffer, len, 1));
+>>>>>>> 7a675ff2ff57ddf58673c8682cbe69e027cf9f30
 
     Halt();
 }

@@ -75,11 +75,19 @@ public:
 
 	int Open(char *name, int type)
 	{
+<<<<<<< HEAD
 		return fileTable->AddOpenFile(name, type);
 	}
 
 	int Close(int id){
 		return fileTable->RemoveOpenFile(id);
+=======
+		return fileTable->Insert(name, type);
+	}
+
+	int Close(int id){
+		return fileTable->Remove(id);
+>>>>>>> 7a675ff2ff57ddf58673c8682cbe69e027cf9f30
 	}
 
 	int Read(char* buffer, int size, int id){
@@ -89,6 +97,7 @@ public:
 	int Write(char* buffer, int size, int id){
 		return fileTable->WriteFile(buffer, size, id);
 	}
+<<<<<<< HEAD
 
 	bool IsFileOpen(char* nameCheck){
 		return fileTable->CheckFileOpen(nameCheck);
@@ -96,6 +105,22 @@ public:
 
 	int Seek(int position, int fileId) { return fileTable->Seek(position, fileId); }
 
+=======
+	/*
+	Kiểm tra 1 file có đang mở không bằng tên file
+	Nếu có trả về 1 ngược lại trả về false
+	*/
+	bool IsFileOpen(char* nameCheck){
+		return fileTable->CheckFileOpen(nameCheck);
+	}
+	/*
+	đưa con trỏ file của 1 file đang mở tới vị trí position
+	Nếu thực hiện thành công trả về vị trí hiện tại của con trỏ file trong file đó
+	Nếu không trả về -1
+	*/
+	int Seek(int position, int fileId) { return fileTable->Seek(position, fileId); }
+	//xóa file
+>>>>>>> 7a675ff2ff57ddf58673c8682cbe69e027cf9f30
 	bool Remove(char *name) { return Unlink(name) == 0; }
 };
 
@@ -110,7 +135,11 @@ public:
 							 // the disk, so initialize the directory
 							 // and the bitmap of free blocks.
 
+<<<<<<< HEAD
 	bool Create(char *name, int initialSize);
+=======
+	bool Create(char *name, int initialSize); 
+>>>>>>> 7a675ff2ff57ddf58673c8682cbe69e027cf9f30
 	// Create a file (UNIX creat)
 
 	OpenFile *Open(char *name); // Open a file (UNIX open)
