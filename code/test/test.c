@@ -86,7 +86,7 @@ int main() {
     for (i = 0; i < len; ++i) {
         buffer[i] = 0;
     }
-    Read(buffer, 50, 0);
+    Read(buffer, 15, 0);
     len = 0;
     while (buffer[len] != '\0') ++len;
     PrintString("\nSize len: ");
