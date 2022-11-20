@@ -85,7 +85,11 @@ class FileTable {
         
         return sizeWrite;
     }
-
+    /*
+        Kiểm tra 1 file có đang mở không bằng tên file đó
+        Nếu file đang mở thì trả về 1
+        Nếu không trả về 0
+    */
     bool CheckFileOpen(char* nameCheck){
         for(int i = 2; i < TABLE_LENGTH; i++){
             if(openFiles[i]){
@@ -96,7 +100,14 @@ class FileTable {
             }
         }
     }
-
+    //đưa con trỏ file của file ở vị trí index trong bảng tới vị trí pos
+    /*
+    Nếu index nằm ngoài chiều dài tối đa của bảng hoặc ở vị trí 0 và 1 thì không thực hiện
+    Nếu tại index không có file nào đang mở thì không thực hiện
+    Nếu pos == -1 thì sẽ pos = độ dài của dữ liệu trong file 
+    Nếu pos nằm ngoài phạm vi có thể tới của con trỏ file thì không thực hiện
+    đưa con trỏ file tới vị trí pos
+    */
     int Seek(int pos, int index) {
         if (index <= 1 || index >= TABLE_LENGTH) return -1;
         if (openFiles[index] == NULL) return -1;

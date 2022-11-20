@@ -89,13 +89,20 @@ public:
 	int Write(char* buffer, int size, int id){
 		return fileTable->WriteFile(buffer, size, id);
 	}
-
+	/*
+	Kiểm tra 1 file có đang mở không bằng tên file
+	Nếu có trả về 1 ngược lại trả về false
+	*/
 	bool IsFileOpen(char* nameCheck){
 		return fileTable->CheckFileOpen(nameCheck);
 	}
-
+	/*
+	đưa con trỏ file của 1 file đang mở tới vị trí position
+	Nếu thực hiện thành công trả về vị trí hiện tại của con trỏ file trong file đó
+	Nếu không trả về -1
+	*/
 	int Seek(int position, int fileId) { return fileTable->Seek(position, fileId); }
-
+	//xóa file
 	bool Remove(char *name) { return Unlink(name) == 0; }
 };
 
