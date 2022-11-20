@@ -47,7 +47,8 @@
         "typeinfo": "c",
         "memory_resource": "c",
         "optional": "c",
-        "string_view": "c"
+        "string_view": "c",
+        "syscall.h": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }
