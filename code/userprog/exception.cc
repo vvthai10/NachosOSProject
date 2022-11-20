@@ -161,7 +161,6 @@ void HandleSyscallReadString(){
 	DEBUG(dbgSys,"Chuoi nhap vao la: " << buffer);
 	//trả chuỗi về vùng nhớ mà người dùng có thể truy cập (user space)
 	System2User(virtAddr,len,buffer);
-	
 	delete[] buffer;
 	return;
 }
@@ -266,7 +265,7 @@ void HandleSyscallRemove() {
 		return;
 	}
 
-	if(kernel->fileSystem->IsFileOpen(fileName) != -1) {
+	if(kernel->fileSystem->IsFileOpen(fileName) == 1) {
 		printf("File is open \n");
 		kernel->machine->WriteRegister(2, -1);
 		delete[] fileName;

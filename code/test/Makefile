@@ -112,7 +112,7 @@ ifeq ($(hosttype),unknown)
 PROGRAMS = unknownhost
 else
 # change this if you create a new test program!
-PROGRAMS = add createfile halt shell matmult sort segments bubblesort readprintnum randomnum readprintchar readprintstring test ascii help
+PROGRAMS = add createfile halt shell matmult sort segments bubblesort readprintnum randomnum readprintchar readprintstring test ascii help cat copy concatenate delete
 endif
 
 all: $(PROGRAMS)
@@ -212,6 +212,31 @@ help.o: help.c
 help: help.o help.o
 	$(LD) $(LDFLAGS) start.o help.o -o help.coff
 	$(COFF2NOFF) help.coff help
+
+cat.o: cat.c
+	$(CC) $(CFLAGS) -c cat.c
+cat: cat.o cat.o
+	$(LD) $(LDFLAGS) start.o cat.o -o cat.coff
+	$(COFF2NOFF) cat.coff cat
+
+copy.o: copy.c
+	$(CC) $(CFLAGS) -c copy.c
+copy: copy.o copy.o
+	$(LD) $(LDFLAGS) start.o copy.o -o copy.coff
+	$(COFF2NOFF) copy.coff copy
+
+concatenate.o: concatenate.c
+	$(CC) $(CFLAGS) -c concatenate.c
+concatenate: concatenate.o concatenate.o
+	$(LD) $(LDFLAGS) start.o concatenate.o -o concatenate.coff
+	$(COFF2NOFF) concatenate.coff concatenate
+
+delete.o: delete.c
+	$(CC) $(CFLAGS) -c delete.c
+delete: delete.o delete.o
+	$(LD) $(LDFLAGS) start.o delete.o -o delete.coff
+	$(COFF2NOFF) delete.coff delete
+
 
 clean:
 	$(RM) -f *.o *.ii
