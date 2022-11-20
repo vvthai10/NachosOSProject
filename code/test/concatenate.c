@@ -1,17 +1,20 @@
 #include "syscall.h"
 #define MAX_FILE_LENGTH 255
 int main() {
-    char fileName1[MAX_FILE_LENGTH];
-    char fileName2[MAX_FILE_LENGTH];
-    char readBuffer[MAX_FILE_LENGTH];
-    int readSize;
-    int idSource1;
-    int idSource2;
+    int i;
+    int n;
+    char fileName1[MAX_FILE_LENGTH];        //tên file1
+    char fileName2[MAX_FILE_LENGTH];        //tên file2
+    char readBuffer[255];                   //buffer ghi dữ liệu
+    char readBuffer2[255];                  //buffer ghi dữ liệu
+    int readSize;                           //kích thước file nối vào 
+    int idSource1;                          //id của file 1 khi mở
+    int idSource2;                          //id của file 2 khi mở
+    PrintString("NOTE: max file name is 255\n");
     //nhập dữ liệu
-    PrintString("input file source 1 (max length 255): ");
+    PrintString("input file source 1:  ");
     ReadString(fileName1,MAX_FILE_LENGTH);
-    PrintChar("\n");
-    PrintString("input file source 2 (max length 255): ");
+    PrintString("input file source 2:  ");
     ReadString(fileName2,MAX_FILE_LENGTH);
     //mở file
     idSource1 = Open(fileName1, 0);
@@ -22,11 +25,20 @@ int main() {
     //lấy dữ liệu từ file nguồn 2
     readSize = Seek(-1,idSource2);
     Seek(0,idSource2);
-    Read(readBuffer, MAX_FILE_LENGTH, idSource2);
+    n = readSize / 255;
     //move con trỏ file tới cuối file nguồn 1
     Seek(-1,idSource1);
+    for(;i<n;i++){
+        Read(readBuffer, 255, idSource2);
+        //viết dữ liệu vào file nguồn 1
+        Write(readBuffer,255,idSource1);
+    }
+    
+    //đọc phần còn lại trong file nguồn 2
+    Read(readBuffer2,255,idSource2);
     //viết dữ liệu vào file nguồn 1
-    Write(readBuffer,readSize,idSource1);
+    Write(readBuffer2,readSize - n * 255 ,idSource1);
+    
     //đóng file
     Close(idSource1);
     Close(idSource2);

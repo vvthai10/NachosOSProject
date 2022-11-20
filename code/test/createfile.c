@@ -5,7 +5,8 @@ main()
 {
   //nhập tên file
   char fileName[MAX_FILE_LENGTH];
-  PrintString("Input file name (max length is 255): ");
+  PrintString("NOTE: max file name is 255\n");
+  PrintString("Input file name  ");
   ReadString(fileName,MAX_FILE_LENGTH);
   //tạo file
   CreateFile(fileName);

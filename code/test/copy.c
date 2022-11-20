@@ -7,18 +7,22 @@ nếu b.txt không tồn tại thì sẽ tạo file b.txt
 nếu b.txt có sẵn dữ liệu sẽ nối dữ liệu từ file a.txt vào cuối b.txt
 */
 int main() {
-    char fileName1[MAX_FILE_LENGTH];
-    char fileName2[MAX_FILE_LENGTH];
-    char readBuffer[MAX_FILE_LENGTH];
-    int readSize;
+    int i = 0;
+    int n;
 
-    int idSource1;
-    int idSource2;
+    char fileName1[MAX_FILE_LENGTH];        //tên file 1
+    char fileName2[MAX_FILE_LENGTH];        //tên fil2
+    char readBuffer[255];                   //buffer ghi dữ liệu
+    char readBuffer2[255];                  //buffer ghi dữ liệu
+    int readSize;                           //kích thước file đọc
+    int idSource1;                          //id của file 1 khi mở
+    int idSource2;                          //id của file 2 khi mở
 
+    PrintString("NOTE: max file name is 255\n");
     //nhập tên file
     PrintString("input source file name (max length 255): ");
     ReadString(fileName1,MAX_FILE_LENGTH);
-    PrintChar('\n');
+
     PrintString("input destination file name (max length 255): ");
     ReadString(fileName2,MAX_FILE_LENGTH);
     //mở file
@@ -35,14 +39,22 @@ int main() {
         idSource2 = Open(fileName2,0);
 
     }
-    //đọc file source
     readSize = Seek(-1,idSource1);
     Seek(0,idSource1);
-    Read(readBuffer,readSize,idSource1);
+    n = readSize / 255;
 
-    //ghi vào file destination
     Seek(-1,idSource2);
-    Write(readBuffer,readSize,idSource2);
+    //đọc file source
+    for(;i < n;i++){  
+        Read(readBuffer,255,idSource1);
+        //ghi vào file destination
+        Write(readBuffer,255,idSource2);
+    }
+    //đọc phần còn lại trong file 
+    Read(readBuffer2,255,idSource1);
+    //ghi vào file destination
+    Write(readBuffer2,readSize - n * 255 ,idSource2);
+
     Close(idSource1);
     Close(idSource2);
     Halt();
