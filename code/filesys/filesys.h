@@ -72,20 +72,23 @@ public:
 			return NULL;
 		return new OpenFile(fileDescriptor);
 	}
-
+	// Thực hiện mở file, chuyển vào cho fileTable thực hiện mở file
 	int Open(char *name, int type)
 	{
 		return fileTable->AddOpenFile(name, type);
 	}
 
+	// Thực hiện đóng file, chuyển vào cho fileTable thực hiện đóng file
 	int Close(int id){
 		return fileTable->RemoveOpenFile(id);
 	}
 
+	// Thực hiện đọc file, chuyển vào cho fileTable thực hiện đọc file
 	int Read(char* buffer, int size, int id){
 		return fileTable->ReadFile(buffer, size, id);
 	}
 
+	// Thực hiện viết file, chuyển vào cho fileTable thực hiện viết file
 	int Write(char* buffer, int size, int id){
 		return fileTable->WriteFile(buffer, size, id);
 	}
@@ -96,12 +99,14 @@ public:
 	bool IsFileOpen(char* nameCheck){
 		return fileTable->CheckFileOpen(nameCheck);
 	}
+	
 	/*
 	đưa con trỏ file của 1 file đang mở tới vị trí position
 	Nếu thực hiện thành công trả về vị trí hiện tại của con trỏ file trong file đó
 	Nếu không trả về -1
 	*/
 	int Seek(int position, int fileId) { return fileTable->Seek(position, fileId); }
+
 	//xóa file
 	bool Remove(char *name) { return Unlink(name) == 0; }
 };

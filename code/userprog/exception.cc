@@ -217,6 +217,7 @@ void HandleSyscallOpenFile(){
 		delete[] fileName;
 		return;
 	}
+	// Tien hanh doc file
 	int id = kernel->fileSystem->Open(fileName, type);
 	if(id == -1){
 		DEBUG(dbgSys, "\tNot open file, some error: full table, name don't exist,...\n");
@@ -233,7 +234,8 @@ void HandleSyscallOpenFile(){
 void HandleSyscallCloseFile(){
 	DEBUG(dbgSys, "Start close file.\n");
 	int id = kernel->machine->ReadRegister(4);
-	DEBUG(dbgSys, "\tFile descriptor id: " << id << "\n");
+
+	// Tien hanh dong file
 	int check = kernel->fileSystem->Close(id);
 
 	if(check == 0){
@@ -244,6 +246,55 @@ void HandleSyscallCloseFile(){
 	}
 	kernel->machine->WriteRegister(2, check);
 	return;
+}
+
+void HandleSyscallReadFile() {
+	int virtAddr = kernel->machine->ReadRegister(4);
+	int size = kernel->machine->ReadRegister(5);
+	int id = kernel->machine->ReadRegister(6);
+
+	char* buffer = User2System(virtAddr, size);
+
+	DEBUG(dbgSys, "Read file has id: " << id << "\n");
+	int check;
+
+	// Doc tu stdin
+	if(id == 0){
+		check = kernel->synchConsoleIn->GetString(buffer, size);
+	}
+	// Doc tu file
+	else{
+		check = kernel->fileSystem->Read(buffer, size, id);
+	}
+
+	kernel->machine->WriteRegister(2, check);
+	System2User(virtAddr, size, buffer);
+
+	delete[] buffer;
+}
+
+void HandleSyscallWriteFile() {
+	int virtAddr = kernel->machine->ReadRegister(4);
+	int size = kernel->machine->ReadRegister(5);
+	int id = kernel->machine->ReadRegister(6);
+
+	char* buffer = User2System(virtAddr, size);
+
+	DEBUG(dbgSys, "Write file have id: " << id << "\n");
+	int check;
+	// Ghi vao terminal
+	if(id == 1){
+		check = kernel->synchConsoleOut->PutString(buffer, size);
+	}
+	// Ghi vao file
+	else{
+		check = kernel->fileSystem->Write(buffer, size, id);
+	}
+	DEBUG(dbgSys, "Write file successful.\n");
+	kernel->machine->WriteRegister(2, check);
+	System2User(virtAddr, size, buffer);
+
+	delete[] buffer;
 }
 
 void HandleSyscallSeek() {
@@ -292,55 +343,6 @@ void HandleSyscallRemove() {
 	}
 	delete[] fileName;
 	return;
-}
-
-void HandleSyscallReadFile() {
-	int virtAddr = kernel->machine->ReadRegister(4);
-	int size = kernel->machine->ReadRegister(5);
-	int id = kernel->machine->ReadRegister(6);
-
-	char* buffer = User2System(virtAddr, size);
-
-	DEBUG(dbgSys, "Read file has id: " << id << "\n");
-	int check;
-
-	// Doc tu stdin
-	if(id == 0){
-		check = kernel->synchConsoleIn->GetString(buffer, size);
-	}
-	// Doc tu file
-	else{
-		check = kernel->fileSystem->Read(buffer, size, id);
-	}
-
-	kernel->machine->WriteRegister(2, check);
-	System2User(virtAddr, size, buffer);
-
-	delete[] buffer;
-}
-
-void HandleSyscallWriteFile() {
-	int virtAddr = kernel->machine->ReadRegister(4);
-	int size = kernel->machine->ReadRegister(5);
-	int id = kernel->machine->ReadRegister(6);
-
-	char* buffer = User2System(virtAddr, size);
-
-	DEBUG(dbgSys, "Write file have id: " << id << "\n");
-	int check;
-	// Ghi vao terminal
-	if(id == 1){
-		check = kernel->synchConsoleOut->PutString(buffer, size);
-	}
-	// Ghi vao file
-	else{
-		check = kernel->fileSystem->Write(buffer, size, id);
-	}
-	DEBUG(dbgSys, "Res return when run write: " << check << "\n");
-	kernel->machine->WriteRegister(2, check);
-	System2User(virtAddr, size, buffer);
-
-	delete[] buffer;
 }
 
 void ExceptionHandler(ExceptionType which)

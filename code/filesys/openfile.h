@@ -30,6 +30,7 @@
 class OpenFile
 {
 public:
+	// Thêm các tham số quản lý file 
 	char *fileName;
 	int type;
 	int descriptorId;
