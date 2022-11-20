@@ -1,9 +1,12 @@
 #include "syscall.h"
-
+/*
+đọc nội dung của file và hiện lên console 
+tuy nhiên nội dung file không đươc quá 255 kí tự
+*/
 int main() {
 
     char fileName[255];
-    char* buffer;
+    char buffer[255];
     int size;
     int id;
     //nhập tên file
