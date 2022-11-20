@@ -296,9 +296,11 @@ void HandleSyscallReadFile() {
 	if(id == 0){
 		check = kernel->synchConsoleIn->GetString(buffer, size);
 	}
+	else{
+		// Doc tu file
+		check = kernel->fileSystem->Read(buffer, size, id);
+	}
 
-	// Doc tu file
-	check = kernel->fileSystem->Read(buffer, size, id);
 
 	kernel->machine->WriteRegister(2, check);
 	System2User(virtAddr, size, buffer);
@@ -319,8 +321,9 @@ void HandleSyscallWriteFile() {
 	if(id == 1){
 		check = kernel->synchConsoleOut->PutString(buffer, size);
 	}
-
-	check = kernel->fileSystem->Write(buffer, size, id);
+	else{
+		check = kernel->fileSystem->Write(buffer, size, id);
+	}
 	DEBUG(dbgSys, "Res return when run write: " << check << "\n");
 	kernel->machine->WriteRegister(2, check);
 	System2User(virtAddr, size, buffer);

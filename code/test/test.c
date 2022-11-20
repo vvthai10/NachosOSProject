@@ -73,6 +73,7 @@ int main() {
     PrintString("\n");
     // ------------ TEST READ ---------
 
+
     // Write to the same file
     write = Write(buffer, len, fileid);
     PrintString("Write ");
@@ -88,7 +89,26 @@ int main() {
     Read(buffer, 50, 0);
     len = 0;
     while (buffer[len] != '\0') ++len;
-    PrintNum(Write(buffer, len, 1));
+    PrintString("\nSize len: ");
+    PrintNum(len);
+    Write(buffer, len, 1);
+   //  PrintNum(Write(buffer, len, 1));
 
     Halt();
 }
+
+// #include"syscall.h"
+
+// int main()  
+// {
+//    char name1[255];
+//    char name2[255];
+//    ReadString(name1, 255);
+//    ReadString(name2, 255);
+
+//    PrintString(name1);
+//    PrintString("\n");
+//    PrintString(name2);
+// //    PrintString(name2);
+//    Halt();
+// }
