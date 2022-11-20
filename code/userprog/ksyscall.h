@@ -222,7 +222,9 @@ void SysPrintString(char* string){
   //in kí tự '\0' 
   SysPrintChar(string[len]);
 }
+
 int SysSeek(int seekPos, int fileId) {
+  //Nếu file cần mở có id = 0,1 thì không thực hiện 
     if (fileId <= 1) {
         DEBUG(dbgSys, "\nCan't seek in console");
         return -1;

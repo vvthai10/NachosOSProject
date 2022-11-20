@@ -243,9 +243,10 @@ void HandleSyscallCloseFile(){
 }
 
 void HandleSyscallSeek() {
+	//lấy ví trí cần dịch và id của file đang mửo
 	int pos = kernel->machine->ReadRegister(4);
 	int fileId =kernel->machine->ReadRegister(5);
-
+	//trả về giá trị và dịch con trỏ file tới vị trí pos
 	kernel->machine->WriteRegister(2, SysSeek(pos,fileId));
 	
 	return;
@@ -254,28 +255,35 @@ void HandleSyscallSeek() {
 void HandleSyscallRemove() {
 	int virAddr = kernel->machine->ReadRegister(4);
 	char* fileName = User2System(virAddr,255);
+	//Kiểm tra người dùng có nhập tên file không
 	if(strlen(fileName) == 0){
 		printf("File name empty.\n");
 		kernel->machine->WriteRegister(2, -1);
 		return;
 	}
+	//Kiểm tra tên file có quá dài không
 	else if(fileName == NULL){
 		printf("File name is more long.\n");
 		kernel->machine->WriteRegister(2, -1);
 		return;
 	}
-
+	//kiểm tra file cần xóa có đang mở hay không
 	if(kernel->fileSystem->IsFileOpen(fileName) == 1) {
 		printf("File is open \n");
 		kernel->machine->WriteRegister(2, -1);
 		delete[] fileName;
 		return;
 	}
+	/*
+	xóa file 
+	nếu xóa thành công thì trả về 0
+	nếu không thì do file đó không tồn tại và trả về -1
+	*/
 	if(!kernel->fileSystem->Remove(fileName)){
 		printf("file doesn't exist\n");
 		kernel->machine->WriteRegister(2, -1);
 	}else {
-		printf("remove success");
+		printf("remove success\n");
 		kernel->machine->WriteRegister(2, 0);
 	}
 	delete[] fileName;
